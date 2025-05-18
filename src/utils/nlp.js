@@ -40,15 +40,22 @@ function parseExplicitJalaliDate(text) {
     'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند'
   ]
   const monthMap = Object.fromEntries(months.map((m, i) => [m, String(i + 1).padStart(2, '0')]))
-  const regex = new RegExp(`(\d{1,2})\s*(${months.join('|')})`, 'g')
-  const match = regex.exec(text)
-  if (match) {
-    const day = match[1].padStart(2, '0')
-    const month = monthMap[match[2]]
+  const regex = new RegExp(`(\d{1,2})\s*(${months.join('|')})`, 'gi')
+  let match = null
+  let earliestMatch = null
+  while ((match = regex.exec(text)) !== null) {
+    if (!earliestMatch || match.index < earliestMatch.index) {
+      earliestMatch = match
+    }
+  }
+  if (earliestMatch) {
+    const day = earliestMatch[1].padStart(2, '0')
+    const month = monthMap[earliestMatch[2]]
     const year = dayjs().calendar('jalali').year()
     return {
       date: `${year}/${month}/${day}`,
-      raw: match[0]
+      raw: earliestMatch[0],
+      fullMatch: match[0]
     }
   }
   return null
@@ -60,7 +67,8 @@ export function parsePersianTask(text) {
     date: null,
     time: null,
     timeRange: null,
-    priority: null
+    priority: null,
+    repeat: null
   }
 
   let workingText = text
@@ -80,20 +88,50 @@ export function parsePersianTask(text) {
   }
 
   const explicitDate = parseExplicitJalaliDate(workingText)
+
+  const rangeRegex = /ساعت\s*(\d{1,2})(?::(\d{2}))?\s*تا\s*(\d{1,2})(?::(\d{2}))?/i
+  const rangeMatch = workingText.match(rangeRegex)
+  if (rangeMatch) {
+    const fromHour = rangeMatch[1].padStart(2, '0')
+    const fromMin = rangeMatch[2] ? rangeMatch[2] : '00'
+    const toHour = rangeMatch[3].padStart(2, '0')
+    const toMin = rangeMatch[4] ? rangeMatch[4] : '00'
+
+    result.timeRange = {
+      from: `${fromHour}:${fromMin}`,
+      to: `${toHour}:${toMin}`
+    }
+    workingText = workingText.replace(rangeMatch[0], '').trim()
+  }
+
   if (explicitDate) {
     result.date = explicitDate.date
-    workingText = workingText.replace(explicitDate.raw, '').trim()
+    workingText = workingText.replace(explicitDate.fullMatch, '').trim()
+  }
+
+  const repeatPatterns = [
+    { regex: /هر\s*روز/, value: 'daily' },
+    { regex: /هر\s*هفته/, value: 'weekly' },
+    { regex: /هفته‌ای\s*یکبار/, value: 'weekly' },
+    { regex: /هر\s*(شنبه|یکشنبه|دوشنبه|سه‌شنبه|چهارشنبه|پنجشنبه|جمعه)/, value: 'weekly' }
+  ]
+  for (const pattern of repeatPatterns) {
+    const match = workingText.match(pattern.regex)
+    if (match) {
+      result.repeat = pattern.value
+      workingText = workingText.replace(match[0], '').trim()
+    }
   }
 
   const dateKeywords = {
     'امروز': getToday(),
     'فردا': getTomorrow(),
     'پس‌فردا': getNextDay(),
-    'پس فردا': getNextDay(),
+    'پس فردا': getNextDay()
   }
 
   for (const key in dateKeywords) {
-    if (workingText.includes(key)) {
+    if (workingText.includes(key) && !result.date) {
       result.date = dateKeywords[key]
       workingText = workingText.replace(key, '').trim()
     }
@@ -101,12 +139,10 @@ export function parsePersianTask(text) {
 
   const weekdayExtendedRegex = /(شنبه|یکشنبه|دوشنبه|سه‌شنبه|چهارشنبه|پنجشنبه|جمعه)(\s+(آینده|بعد))?/
   const weekdayMatch = workingText.match(weekdayExtendedRegex)
-  if (weekdayMatch) {
+  if (weekdayMatch && !result.date) {
     const date = getWeekdayDate(weekdayMatch[1], weekdayMatch[3])
-    if (date) {
-      result.date = date
-      workingText = workingText.replace(weekdayMatch[0], '').trim()
-    }
+    result.date = date
+    workingText = workingText.replace(weekdayMatch[0], '').trim()
   }
 
   const partOfDay = {
@@ -121,21 +157,6 @@ export function parsePersianTask(text) {
       result.timeRange = { ...partOfDay[key] }
       workingText = workingText.replace(key, '').trim()
     }
-  }
-
-  const rangeRegex = /ساعت\s*(\d{1,2})(?::(\d{2}))?\s*تا\s*(\d{1,2})(?::(\d{2}))?/i
-  const rangeMatch = workingText.match(rangeRegex)
-  if (rangeMatch) {
-    const fromHour = rangeMatch[1].padStart(2, '0')
-    const fromMin = rangeMatch[2] ? rangeMatch[2] : '00'
-    const toHour = rangeMatch[3].padStart(2, '0')
-    const toMin = rangeMatch[4] ? rangeMatch[4] : '00'
-
-    result.timeRange = {
-      from: `${fromHour}:${fromMin}`,
-      to: `${toHour}:${toMin}`,
-    }
-    workingText = workingText.replace(rangeMatch[0], '').trim()
   }
 
   if (!result.timeRange) {
@@ -161,6 +182,7 @@ export function parsePersianTask(text) {
     result.date = getToday()
   }
 
-  result.title = workingText.trim()
+  result.title = workingText.trim() 
+  console.log(result)
   return result
 }
