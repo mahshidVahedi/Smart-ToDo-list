@@ -1,4 +1,3 @@
-// src/utils/nlp.js
 import { normalizeText } from './nlp/normalize'
 import { extractDate } from './nlp/date'
 import { extractTime, extractTimeRange } from './nlp/time'
@@ -6,28 +5,32 @@ import { extractRepeat } from './nlp/repeat'
 import { extractPriority } from './nlp/priority'
 import { extractTitle } from './nlp/title'
 
-export async function parsePersianTask(text) {
-  const normalized = normalizeText(text)
-  const result = {
-    title: null,
-    date: null,
-    time: null,
-    timeRange: null,
-    priority: null,
-    repeat: null
+export async function parsePersianTask(text, options = {}) {
+  const normalized = normalizeText(text);
+
+  const detectedPriority = extractPriority(normalized);
+  const dateInfo = extractDate(normalized);
+  const timeRange = extractTimeRange(normalized);
+  const time = timeRange ? null : extractTime(normalized);
+  const repeat = dateInfo.repeat || extractRepeat(normalized);
+
+  const common = {
+    date: dateInfo.date,
+    time,
+    timeRange,
+    priority: 'priority' in options ? options.priority : detectedPriority,
+    repeat
+  };
+
+  if (!normalized.includes(' و ')) {
+    return [{
+      title: extractTitle(normalized, common),
+      ...common
+    }];
   }
 
-  result.priority = extractPriority(normalized)
-  result.repeat = extractRepeat(normalized)
-  result.date = extractDate(normalized)
-  result.timeRange = extractTimeRange(normalized)
-  result.time = result.timeRange ? null : extractTime(normalized)
-  result.title = extractTitle(normalized, result)
-
-  if (!result.date && (result.time || result.timeRange)) {
-    const { getToday } = await import('./nlp/utils')
-    result.date = getToday()
-  }
-
-  return result
+  return normalized.split(/\s+و\s+/).map(part => ({
+    title: extractTitle(part, common),
+    ...common
+  }));
 }
