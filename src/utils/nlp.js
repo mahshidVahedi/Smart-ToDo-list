@@ -6,13 +6,15 @@ import { extractPriority } from './nlp/priority'
 import { extractTitle } from './nlp/title'
 
 export async function parsePersianTask(text, options = {}) {
-  const normalized = normalizeText(text);
+  if (!text || !text.trim()) return []
 
-  const detectedPriority = extractPriority(normalized);
-  const dateInfo = extractDate(normalized);
-  const timeRange = extractTimeRange(normalized);
-  const time = timeRange ? null : extractTime(normalized);
-  const repeat = dateInfo.repeat || extractRepeat(normalized);
+  const normalized = normalizeText(text)
+
+  const detectedPriority = extractPriority(normalized)
+  const dateInfo = extractDate(normalized)
+  const timeRange = extractTimeRange(normalized)
+  const time = timeRange ? null : extractTime(normalized)
+  const repeat = dateInfo.repeat || extractRepeat(normalized)
 
   const common = {
     date: dateInfo.date,
@@ -20,17 +22,15 @@ export async function parsePersianTask(text, options = {}) {
     timeRange,
     priority: 'priority' in options ? options.priority : detectedPriority,
     repeat
-  };
-
-  if (!normalized.includes(' و ')) {
-    return [{
-      title: extractTitle(normalized, common),
-      ...common
-    }];
   }
 
-  return normalized.split(/\s+و\s+/).map(part => ({
+  const parts = normalized
+    .split(/[,،]|(?:\s+و\s+)/g)
+    .map(p => p.trim())
+    .filter(p => p.length > 1)
+
+  return parts.map(part => ({
     title: extractTitle(part, common),
     ...common
-  }));
+  }))
 }

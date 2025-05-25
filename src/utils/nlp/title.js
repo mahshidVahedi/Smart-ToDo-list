@@ -5,6 +5,8 @@ export function extractTitle(text, result) {
     clean = clean.replace(/\d{1,2}\s*(فروردین|اردیبهشت|خرداد|تیر|مرداد|شهریور|مهر|آبان|آذر|دی|بهمن|اسفند)/g, '');
     clean = clean.replace(/ساعت\s*[\d۰-۹]{1,2}([:٫،\.]?\d{0,2})?/g, '');
     clean = clean.replace(/[\d۰-۹]{1,2}([:٫،\.]?\d{0,2})?\s*تا\s*[\d۰-۹]{1,2}([:٫،\.]?\d{0,2})?/g, '');
+    clean = clean.replace(/[!،٫؛؟:«»"'.…]/g, '')
+    clean = clean.trim()
   
     const ignoreTokens = [
       'هر', 'در', 'با', 'ساعت', 'شب', 'صبح', 'ظهر', 'عصر', 'تا',
@@ -21,5 +23,7 @@ export function extractTitle(text, result) {
   
     filteredTokens = filteredTokens.filter(token => !/^\d+$/.test(token));
   
-    return filteredTokens.join(' ').trim();
+    const finalTitle = filteredTokens.join(' ').trim();
+    return finalTitle.length > 0 ? finalTitle : text.trim();
   }
+  
