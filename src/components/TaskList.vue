@@ -13,7 +13,6 @@
       <template #item="{ element }">
         <div class="flex items-start gap-2 group relative">
 
-          <!-- drag icon -->
           <span
             class="drag-handle cursor-grab text-gray-400 dark:text-gray-500 text-lg transition-opacity opacity-60 group-hover:opacity-100"
             title="بکش و رها کن"
@@ -21,7 +20,6 @@
             ☰
           </span>
 
-          <!-- تسک آیتم -->
           <TaskItem
             :task="element"
             @toggle-complete="$emit('toggle-complete', element.id)"
@@ -71,9 +69,9 @@ const onReorder = () => {
   opacity: 0.4;
 }
 .drag-chosen {
-  background-color: #e5e7eb; /* gray-200 */
+  background-color: #e5e7eb; 
 }
 .dark .drag-chosen {
-  background-color: #374151; /* gray-700 */
+  background-color: #374151;
 }
 </style>
