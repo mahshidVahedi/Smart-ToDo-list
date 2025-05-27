@@ -144,30 +144,56 @@ const handleTaskMove = ({ taskId, projectId }) => {
     task.projectId = projectId
   }
 }
+const isDark = ref(false)
+
+const toggleDark = () => {
+  isDark.value = !isDark.value
+}
+
+watch(isDark, (val) => {
+  localStorage.setItem('theme', val ? 'dark' : 'light')
+  document.documentElement.classList.toggle('dark', val)
+})
+
+onMounted(() => {
+  const savedTheme = localStorage.getItem('theme')
+  isDark.value = savedTheme === 'dark'
+  document.documentElement.classList.toggle('dark', isDark.value)
+})
 
 </script>
 
 <template>
-  <div class="flex flex-col md:flex-row gap-6 p-6">
-    <ProjectSidebar :projects="projects" :selected-id="selectedProjectId" @select-project="selectedProjectId = $event"
-      @add-project="addProject" @delete-project="deleteProject" @move-task-to-project="handleTaskMove" />
+  <div class="min-h-screen bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100 transition-colors duration-300">
 
+    <button @click="toggleDark"
+      class="fixed top-4 left-4 z-50 p-2 px-3 text-sm font-medium bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-700 rounded-full shadow hover:scale-105 transition">
+      {{ isDark ? '☀️ روشن' : '🌙 تاریک' }}
+    </button>
 
-    <div class="flex-1 space-y-6 bg-gray-100 dark:bg-gray-900 p-4 rounded-xl">
-      <h1 class="text-2xl font-bold text-gray-800 dark:text-white text-center">
-        برنامه‌ریز روزانه 📝
-      </h1>
+    <div class="flex flex-col md:flex-row gap-6 p-6 max-w-7xl mx-auto">
+      <ProjectSidebar :projects="projects" :selected-id="selectedProjectId" @select-project="selectedProjectId = $event"
+        @add-project="addProject" @delete-project="deleteProject" @move-task-to-project="handleTaskMove" />
 
-      <TaskStats :total="totalCount" :done="doneCount" :undone="undoneCount" />
-      <div class="flex flex-col lg:flex-row gap-6 items-start">
-        <NLPInput :project-id="selectedProjectId" @submit="handleParsedText" class="flex-1 lg:max-w-sm" />
-        <TaskForm :project-id="selectedProjectId" @submit="addTask" class="flex-1" />
+      <div class="flex-1 space-y-6 bg-gray-50 dark:bg-gray-900 p-6 rounded-2xl shadow-md">
+
+        <h1 class="text-3xl font-bold text-center text-gray-800 dark:text-white tracking-tight">
+          برنامه‌ریز روزانه 📝
+        </h1>
+
+        <TaskStats :total="totalCount" :done="doneCount" :undone="undoneCount" />
+
+        <div class="flex flex-col lg:flex-row gap-6 items-start">
+          <NLPInput :project-id="selectedProjectId" @submit="handleParsedText" class="flex-1 lg:max-w-sm" />
+          <TaskForm :project-id="selectedProjectId" @submit="addTask" class="flex-1" />
+        </div>
+
+        <FiltersBar :selected-status="statusFilter" :selected-priority="priorityFilter" @update-status="updateStatus"
+          @update-priority="updatePriority" />
+
+        <TaskList :tasks="filteredTasks" @toggle-complete="toggleComplete" @delete-task="deleteTask"
+          @reorder="reorderTasks" />
       </div>
-
-      <FiltersBar :selected-status="statusFilter" :selected-priority="priorityFilter" @update-status="updateStatus"
-        @update-priority="updatePriority" />
-      <TaskList :tasks="filteredTasks" @toggle-complete="toggleComplete" @delete-task="deleteTask"
-        @reorder="reorderTasks" />
     </div>
   </div>
 </template>
