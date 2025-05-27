@@ -127,7 +127,7 @@ const reorderTasks = (newList) => {
   tasks.splice(0, tasks.length, ...reordered)
 }
 
-const handleParsedText = async (text) => {
+const handleParsedText = async ({ text }) => {
   const parsedTasks = await parsePersianTask(text)
   parsedTasks.forEach(task => {
     tasks.push({
