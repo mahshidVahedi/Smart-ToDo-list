@@ -49,7 +49,6 @@ const PersianDatePicker = defineAsyncComponent(() =>
   import('vue3-persian-datetime-picker')
 )
 
-
 const props = defineProps({
   initialData: Object,
   isEditMode: Boolean,
@@ -80,13 +79,18 @@ watch(
 )
 
 const handleSubmit = () => {
-  emit('submit', { ...form })
+  emit('submit', {
+    ...form,
+    projectId: props.projectId
+  })
+  emit('toast', '✅ تسک با موفقیت افزوده شد!')
+
   form.title = ''
   form.date = ''
   form.time = ''
   form.priority = ''
-  projectId: props.projectId
 }
+
 </script>
 
 <style scoped>

@@ -13,6 +13,7 @@ const handleSubmit = () => {
   text: input.value.trim(),
   projectId: props.projectId
 })
+emit('toast', '✅ تسک با موفقیت افزوده شد!')
   input.value = ''
 }
 </script>

@@ -161,9 +161,22 @@ onMounted(() => {
   document.documentElement.classList.toggle('dark', isDark.value)
 })
 
+const toastMessage = ref('')
+
+const showToast = (message) => {
+  toastMessage.value = message
+  setTimeout(() => {
+    toastMessage.value = ''
+  }, 2500)
+}
 </script>
 
 <template>
+  <div v-if="toastMessage"
+    class="fixed bottom-6 left-1/2 -translate-x-1/2 px-4 py-2 bg-green-600 text-white rounded-xl shadow z-50 transition-opacity duration-300">
+    {{ toastMessage }}
+  </div>
+
   <div class="min-h-screen bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100 transition-colors duration-300">
 
     <button @click="toggleDark"
@@ -184,8 +197,8 @@ onMounted(() => {
         <TaskStats :total="totalCount" :done="doneCount" :undone="undoneCount" />
 
         <div class="flex flex-col lg:flex-row gap-6 items-start">
-          <NLPInput :project-id="selectedProjectId" @submit="handleParsedText" class="flex-1 lg:max-w-sm" />
-          <TaskForm :project-id="selectedProjectId" @submit="addTask" class="flex-1" />
+          <NLPInput :project-id="selectedProjectId" @submit="handleParsedText" @toast="showToast" class="flex-1 lg:max-w-sm" />
+          <TaskForm :project-id="selectedProjectId" @submit="addTask" @toast="showToast" class="flex-1" />
         </div>
 
         <FiltersBar :selected-status="statusFilter" :selected-priority="priorityFilter" @update-status="updateStatus"
