@@ -21,3 +21,13 @@ export function getNextWeekday(weekdayIndex) {
 export function toShamsi(date) {
   return moment(date).format('jYYYY/jMM/jDD')
 }
+export function normalizeDigits(text) {
+  const persianDigits = '۰۱۲۳۴۵۶۷۸۹'
+  const arabicDigits = '٠١٢٣٤٥٦٧٨٩'
+  return text.replace(/[۰-۹٠-٩]/g, d => {
+    const index = persianDigits.indexOf(d) !== -1
+      ? persianDigits.indexOf(d)
+      : arabicDigits.indexOf(d)
+    return index !== -1 ? index.toString() : d
+  })
+}

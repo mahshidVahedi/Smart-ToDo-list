@@ -197,7 +197,8 @@ const showToast = (message) => {
         <TaskStats :total="totalCount" :done="doneCount" :undone="undoneCount" />
 
         <div class="flex flex-col lg:flex-row gap-6 items-start">
-          <NLPInput :project-id="selectedProjectId" @submit="handleParsedText" @toast="showToast" class="flex-1 lg:max-w-sm" />
+          <NLPInput :project-id="selectedProjectId" @submit="handleParsedText" @toast="showToast"
+            class="flex-1 lg:max-w-sm" />
           <TaskForm :project-id="selectedProjectId" @submit="addTask" @toast="showToast" class="flex-1" />
         </div>
 
@@ -210,3 +211,27 @@ const showToast = (message) => {
     </div>
   </div>
 </template>
+<style>
+:root.dark .vpd-content {
+  background-color: #1f2937 !important;
+  color: white !important;
+}
+
+:root.dark .vpd-title,
+:root.dark .vpd-header,
+:root.dark .vpd-actions {
+  background-color: #111827 !important;
+  color: white !important;
+}
+
+:root.dark .vpd-day.vpd-today {
+  background-color: #2563eb !important;
+  color: white !important;
+}
+
+:root.dark input.vpd-input {
+  background-color: #374151 !important;
+  color: #fff !important;
+  border: 1px solid #4b5563 !important;
+}
+</style>

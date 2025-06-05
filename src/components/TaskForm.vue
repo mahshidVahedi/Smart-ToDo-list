@@ -8,8 +8,9 @@
     <div class="flex flex-col sm:flex-row gap-4">
       <div class="flex-1">
         <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">تاریخ</label>
-        <PersianDatePicker v-model="form.date" format="jYYYY/jMM/jDD" display-format="jYYYY/jMM/jDD" color="#3b82f6"
-          :editable="true" input-class="input-style" />
+        <PersianDatePicker
+          input-class="w-full px-4 py-2 text-sm rounded-xl border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500" />
+
       </div>
       <div class="flex-1">
         <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">ساعت</label>
@@ -21,11 +22,12 @@
       <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">اولویت</label>
       <select v-model="form.priority" class="input-style">
         <option value="">بدون اولویت</option>
-        <option value="low" class="bg-green-100">کم</option>
-        <option value="medium" class="bg-yellow-100">متوسط</option>
-        <option value="important" class="bg-orange-100">مهم</option>
-        <option value="high" class="bg-red-100">فوری</option>
+        <option value="low">کم</option>
+        <option value="medium">متوسط</option>
+        <option value="important">مهم</option>
+        <option value="high">فوری</option>
       </select>
+
     </div>
 
     <div class="flex flex-col sm:flex-row justify-end items-center gap-3 pt-2">
@@ -45,6 +47,9 @@
 
 <script setup>
 import { reactive, watch, defineAsyncComponent } from 'vue'
+import Timepicker from 'vue3-timepicker'
+import 'vue3-timepicker/dist/VueTimepicker.css'
+
 const PersianDatePicker = defineAsyncComponent(() =>
   import('vue3-persian-datetime-picker')
 )
@@ -96,5 +101,9 @@ const handleSubmit = () => {
 <style scoped>
 .input-style {
   @apply w-full px-4 py-2 text-sm rounded-xl border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500;
+}
+
+.input-style[type="time"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
 }
 </style>
