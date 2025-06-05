@@ -1,25 +1,38 @@
 <script setup>
 import { ref } from 'vue'
+
 const props = defineProps({
   projectId: Number
 })
+const emit = defineEmits(['submit', 'toast'])
 
-const emit = defineEmits(['submit'])
 const input = ref('')
+const errorMessage = ref('')
 
 const handleSubmit = () => {
-  if (!input.value.trim()) return
+  const trimmed = input.value.trim()
+  if (!trimmed) {
+    errorMessage.value = 'لطفاً یک جمله وارد کنید'
+    return
+  }
+
+  errorMessage.value = '' // clear old errors
+
   emit('submit', {
-  text: input.value.trim(),
-  projectId: props.projectId
-})
-emit('toast', '✅ تسک با موفقیت افزوده شد!')
+    text: trimmed,
+    projectId: props.projectId
+  })
+
+  emit('toast', '✅ تسک با موفقیت افزوده شد!')
   input.value = ''
 }
 </script>
 
 <template>
-  <form @submit.prevent="handleSubmit" class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow space-y-4 border border-gray-200 dark:border-gray-700 max-w-lg mx-auto">
+  <form
+    @submit.prevent="handleSubmit"
+    class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow space-y-4 border border-gray-200 dark:border-gray-700 max-w-lg mx-auto"
+  >
     <label class="block text-sm font-semibold text-gray-700 dark:text-white">
       ساخت تسک از روی جمله فارسی 🧠
     </label>
@@ -29,6 +42,8 @@ emit('toast', '✅ تسک با موفقیت افزوده شد!')
       placeholder="مثلاً: جلسه مهم هر دوشنبه عصر ساعت ۴ تا ۶ در ۲۵ تیر"
       class="textarea-style"
     ></textarea>
+
+    <p v-if="errorMessage" class="text-red-500 text-sm">{{ errorMessage }}</p>
 
     <div class="flex justify-end">
       <button
