@@ -1,5 +1,6 @@
 <template>
-  <aside class="w-full md:w-64 bg-white dark:bg-gray-800 p-5 rounded-2xl shadow-md border border-gray-200 dark:border-gray-700">
+  <aside
+    class="w-full md:w-64 bg-white dark:bg-gray-800 p-5 rounded-2xl shadow-md border border-gray-200 dark:border-gray-700">
     <h2 class="text-lg font-bold text-gray-700 dark:text-gray-100 mb-4 flex items-center gap-2">
       <span>📁</span>
       <span>پروژه‌ها</span>
@@ -7,7 +8,7 @@
 
     <ul class="space-y-2">
       <li
-        v-for="project in projects"
+        v-for="project in fullProjectList"
         :key="project.id"
         class="flex items-center justify-between px-3 py-2 rounded-xl transition cursor-pointer group"
         :class="[
@@ -29,7 +30,7 @@
         </span>
 
         <button
-          v-if="project.id !== 1"
+          v-if="project.id > 0"
           @click="$emit('delete-project', project.id)"
           class="text-red-500 hover:text-red-600 text-sm ml-2 transition"
           title="حذف پروژه"
@@ -57,7 +58,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 
 const props = defineProps({
   projects: Array,
@@ -81,4 +82,16 @@ const handleDrop = (event, projectId) => {
   emit('move-task-to-project', { taskId, projectId })
   isDropTarget.value = null
 }
+
+// پروژه‌های سیستمی (ثابت)
+const fixedProjects = [
+  { id: 0, name: '🗂️ همه تسک‌ها' },
+  { id: -1, name: '📅 امروز' },
+  { id: -2, name: '✅ انجام‌شده‌ها' },
+]
+
+// همه پروژه‌ها
+const fullProjectList = computed(() => {
+  return [...fixedProjects, ...props.projects]
+})
 </script>
