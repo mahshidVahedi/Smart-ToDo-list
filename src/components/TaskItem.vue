@@ -17,13 +17,19 @@
         </button>
       </div>
 
+      <!-- ویژگی‌های تسک -->
       <div class="flex flex-wrap gap-2 text-sm text-gray-600 dark:text-gray-300 min-h-[28px]">
         <span v-if="task.timeRange">🕒 {{ task.timeRange.from }} - {{ task.timeRange.to }}</span>
         <span v-else-if="task.time">🕒 {{ task.time }}</span>
+        <span v-else>⏳ بدون زمان</span>
+
         <span v-if="task.date">📅 {{ task.date }}</span>
 
         <span v-if="task.priority" class="text-xs font-bold rounded-full px-2 py-0.5" :class="colorClass">
           {{ priorityLabelMap[task.priority] || task.priority }}
+        </span>
+        <span v-else class="text-xs font-bold rounded-full px-2 py-0.5 bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300">
+          🏷️ بدون اولویت
         </span>
 
         <span v-if="task.repeat"
@@ -89,8 +95,8 @@ const repeatLabel = computed(() => {
   }
   return ''
 })
-const onDragStart = (e) => {
-  e.dataTransfer.setData('text/plain', task.id)
-}
 
+const onDragStart = (e) => {
+  e.dataTransfer.setData('text/plain', props.task.id)
+}
 </script>
