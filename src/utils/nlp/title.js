@@ -24,10 +24,9 @@ export function extractTitle(text, result) {
   let filteredTokens = tokens.filter(token => !ignoreTokens.includes(token));
   filteredTokens = filteredTokens.filter(token => token !== 'از' && token !== 'در');
 
-  if (result.priority) {
-    const priorityTokens = ['مهم', 'فوری', 'متوسط', 'عادی'];
-    filteredTokens = filteredTokens.filter(token => !priorityTokens.includes(token));
-  }
+  const priorityTokens = ['مهم', 'فوری', 'متوسط', 'عادی'];
+filteredTokens = filteredTokens.filter(token => !priorityTokens.includes(token));
+
 
   filteredTokens = filteredTokens.filter(token => !/^\d+$/.test(token));
 
