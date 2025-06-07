@@ -63,6 +63,7 @@ import TaskStats from './components/TaskStats.vue'
 import TaskList from './components/TaskList.vue'
 import { parsePersianTask } from './utils/nlp'
 import jalaali from 'jalaali-js'
+import { isBeforeToday } from './utils/nlp/utils'
 
 const loadFromStorage = (key, fallback) => {
   try {
@@ -110,33 +111,33 @@ const isToday = (persianDateStr) => {
   const todayStr = `${jy}/${pad(jm)}/${pad(jd)}`
   return persianDateStr === todayStr
 }
-
 const filteredTasks = computed(() => {
   return tasks.filter(task => {
-    let matchProject = false
+    let matchProject = false;
 
     if (selectedProjectId.value === -1) {
-      matchProject = isToday(task.date)
+      matchProject = isToday(task.date);
     } else if (selectedProjectId.value === -2) {
-      matchProject = task.completed
+      matchProject = task.completed;
+    } else if (selectedProjectId.value === -3) {
+      matchProject = task.date && !task.completed && !isToday(task.date) && isBeforeToday(task.date);
     } else if (selectedProjectId.value === 0) {
-      matchProject = true
+      matchProject = true;
     } else {
-      matchProject = task.projectId === selectedProjectId.value
+      matchProject = task.projectId === selectedProjectId.value;
     }
 
     const matchStatus =
       statusFilter.value === 'all' ||
       (statusFilter.value === 'done' && task.completed) ||
-      (statusFilter.value === 'undone' && !task.completed)
+      (statusFilter.value === 'undone' && !task.completed);
 
     const matchPriority =
-      !priorityFilter.value || task.priority === priorityFilter.value
+      !priorityFilter.value || task.priority === priorityFilter.value;
 
-    return matchProject && matchStatus && matchPriority
-  })
-})
-
+    return matchProject && matchStatus && matchPriority;
+  });
+});
 
 
 const totalCount = computed(() => filteredTasks.value.length)

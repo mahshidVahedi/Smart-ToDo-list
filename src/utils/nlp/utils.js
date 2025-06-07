@@ -10,9 +10,8 @@ export function addDays(date, days) {
 
 export function getNextWeekday(weekdayIndex) {
   const today = moment()
-  const todayIso = today.isoWeekday() // 1 (Mon) → 7 (Sun)
+  const todayIso = today.isoWeekday() 
 
-  // چون شنبه=7، سه‌شنبه=3
   let daysUntil = weekdayIndex - todayIso
   if (daysUntil <= 0) daysUntil += 7
   return today.add(daysUntil, 'days')
@@ -30,4 +29,12 @@ export function normalizeDigits(text) {
       : arabicDigits.indexOf(d)
     return index !== -1 ? index.toString() : d
   })
+}
+export function isBeforeToday(dateStr) {
+  if (!dateStr) return false
+
+  const today = moment().startOf('day')
+  const taskDate = moment(dateStr, 'jYYYY/jMM/jDD').startOf('day')
+
+  return taskDate.isBefore(today)
 }

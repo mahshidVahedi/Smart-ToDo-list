@@ -83,14 +83,13 @@ const handleDrop = (event, projectId) => {
   isDropTarget.value = null
 }
 
-// پروژه‌های سیستمی (ثابت)
 const fixedProjects = [
   { id: 0, name: '🗂️ همه تسک‌ها' },
   { id: -1, name: '📅 امروز' },
   { id: -2, name: '✅ انجام‌شده‌ها' },
+  { id: -3, name: '❌ از دست رفته ها' },
 ]
 
-// همه پروژه‌ها
 const fullProjectList = computed(() => {
   return [...fixedProjects, ...props.projects]
 })
