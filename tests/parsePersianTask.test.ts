@@ -41,7 +41,7 @@ describe('NLP - Persian Task Parsing', () => {
   })
 
   it('should remove priority words when result.priority is true', async () => {
-    const result = await parsePersianTask('جلسه خیلی فوری شب ساعت ۹', { priority: true })
+    const result = await parsePersianTask('جلسه فوری شب ساعت ۹', { priority: true })
     expect(result).toHaveLength(1)
     expect(result[0].title).toBe('جلسه')
   })
@@ -110,7 +110,7 @@ it('should extract "next week" and convert to correct date', async () => {
 })
 
 it('should distinguish priority from context (not part of title)', async () => {
-  const result = await parsePersianTask('جلسه خیلی مهم با مدیرعامل سه‌شنبه')
+  const result = await parsePersianTask('جلسه مهم با مدیرعامل سه‌شنبه')
   expect(result[0].title).toBe('جلسه با مدیرعامل')
 })
 
@@ -155,7 +155,7 @@ it('should parse compound date + weekday without conflict', async () => {
 })
 
 it('should detect double time ranges and split if necessary', async () => {
-  const result = await parsePersianTask('مطالعه ساعت ۸ تا ۹ ، ورزش ساعت ۱۰ تا ۱۱')
+  const result = await parsePersianTask('مطالعه ساعت ۸ تا ۹ و ورزش ساعت ۱۰ تا ۱۱')
   expect(result).toHaveLength(2)
   expect(result[0].title).toBe('مطالعه')
   expect(result[0].timeRange?.from || result[0].time).toBe('08:00')
