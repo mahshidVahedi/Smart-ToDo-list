@@ -18,6 +18,10 @@ export function extractDate(text) {
       const date = toShamsi(getToday())
       return { date, repeat: '', isExplicit: false }
     }
+    if (/امشب/.test(normalized)) {
+      const date = toShamsi(getToday())
+      return { date, repeat: '', isExplicit: false }
+    }
   
     if (/فردا/.test(normalized)) {
       const date = toShamsi(addDays(getToday(), 1))
