@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { parsePersianTask } from '../src/utils/nlp'
+import { extractPriority } from '../src/utils/nlp/priority'
 
 describe('NLP - Persian Task Parsing', () => {
 
@@ -167,4 +168,30 @@ it('should normalize half-width and full-width digits', async () => {
   const result = await parsePersianTask('یادآوری قسط در ۵ مرداد ساعت ٩')
   expect(result[0].date).toMatch(/^1404\/05\/05$/)
   expect(result[0].timeRange?.from || result[0].time).toBe('09:00')
+})
+describe('extractPriority', () => {
+  it('should detect important priority', () => {
+    expect(extractPriority('قرار فوری')).toBe('high')
+    expect(extractPriority('جلسه خیلی‌مهم')).toBe('high')
+  })
+
+  it('should detect important priority', () => {
+    expect(extractPriority('جلسه مهم')).toBe('important')
+  })
+
+  it('should detect medium priority', () => {
+    expect(extractPriority('کار متوسط')).toBe('medium')
+    expect(extractPriority('پیگیری معمولی')).toBe('medium')
+  })
+
+  it('should detect low priority', () => {
+    expect(extractPriority('پاسخ‌دهی عادی')).toBe('low')
+    expect(extractPriority('کار با تأخیر')).toBe('low')
+    expect(extractPriority('کار با تاخیر')).toBe('low')
+  })
+
+  it('should return null if no priority found', () => {
+    expect(extractPriority('مطالعه کتاب')).toBe(null)
+    expect(extractPriority('پروژه ریاضی')).toBe(null)
+  })
 })
