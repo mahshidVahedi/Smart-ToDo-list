@@ -1,7 +1,7 @@
 <template>
   <form @submit.prevent="handleSubmit"
     class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-md space-y-6 border border-gray-200 dark:border-gray-700 max-w-lg mx-auto">
-    
+
     <div>
       <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">عنوان</label>
       <input v-model="form.title" type="text" class="input-style" placeholder="مثلاً: جلسه با تیم توسعه" required />
@@ -9,15 +9,13 @@
 
     <div class="flex flex-col sm:flex-row gap-4">
       <div class="flex-1">
-  <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">تاریخ</label>
-  <div class="relative w-full">
-    <PersianDatePicker
-      v-model="form.date"
-      input-class="w-full px-4 py-2 text-sm rounded-xl border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-      style="width: 100%"
-    />
-  </div>
-</div>
+        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">تاریخ</label>
+        <div class="relative w-full">
+          <PersianDatePicker v-model="form.date"
+            input-class="w-full px-4 py-2 text-sm rounded-xl border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            style="width: 100%" />
+        </div>
+      </div>
 
 
       <div class="flex-1">
@@ -34,6 +32,15 @@
         <option value="medium">متوسط</option>
         <option value="important">مهم</option>
         <option value="high">فوری</option>
+      </select>
+    </div>
+    <div>
+      <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">تکرار</label>
+      <select v-model="form.repeat" class="input-style">
+        <option value="">بدون تکرار</option>
+        <option value="daily">هر روز</option>
+        <option value="weekly">هر هفته</option>
+        <option value="monthly">هر ماه</option>
       </select>
     </div>
 
@@ -72,6 +79,7 @@ const form = reactive({
   date: '',
   time: '',
   priority: '',
+  repeat: ''
 })
 
 watch(
@@ -82,6 +90,7 @@ watch(
       form.date = newVal.date || ''
       form.time = newVal.time || ''
       form.priority = newVal.priority || ''
+      form.repeat = newVal.repeat || ''
     }
   },
   { immediate: true }
@@ -98,6 +107,7 @@ const handleSubmit = () => {
   form.date = ''
   form.time = ''
   form.priority = ''
+  form.repeat = ''
 }
 </script>
 
