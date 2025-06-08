@@ -1,37 +1,23 @@
 <template>
   <div class="container max-w-lg mx-auto px-4 space-y-4">
-    <draggable
-      v-model="localTasksInternal"
-      item-key="id"
-      handle=".drag-handle"
-      @end="onReorder"
-      class="space-y-3"
-      ghost-class="drag-ghost"
-      chosen-class="drag-chosen"
-      animation="180"
-    >
+    <draggable v-model="localTasksInternal" item-key="id" handle=".drag-handle" @end="onReorder" class="space-y-3"
+      ghost-class="drag-ghost" chosen-class="drag-chosen" animation="180">
       <template #item="{ element }">
         <div class="flex items-start gap-2 group relative">
           <span
             class="drag-handle cursor-grab text-gray-400 dark:text-gray-500 text-lg transition-opacity opacity-60 group-hover:opacity-100"
-            title="بکش و رها کن"
-          >
+            title="بکش و رها کن">
             ☰
           </span>
-          <TaskItem
-            :task="element"
-            :projects="projects"
-            @toggle-complete="$emit('toggle-complete', element.id)"
-            @delete-task="$emit('delete-task', element.id)"
-          />
+          <TaskItem :task="element" :projects="projects" @toggle-complete="$emit('toggle-complete', element.id)"
+            @delete-task="$emit('delete-task', element.id)" @edit="$emit('edit', element)" />
+
         </div>
       </template>
     </draggable>
 
-    <div
-      v-if="!localTasks.length"
-      class="flex flex-col items-center justify-center text-center py-12 text-gray-500 dark:text-gray-400 border border-dashed rounded-xl border-gray-300 dark:border-gray-600"
-    >
+    <div v-if="!localTasks.length"
+      class="flex flex-col items-center justify-center text-center py-12 text-gray-500 dark:text-gray-400 border border-dashed rounded-xl border-gray-300 dark:border-gray-600">
       <svg xmlns="http://www.w3.org/2000/svg" class="w-16 h-16 mb-4 text-blue-400 dark:text-blue-300" fill="none"
         viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -53,7 +39,7 @@ const props = defineProps({
   projects: Array
 })
 
-const emit = defineEmits(['toggle-complete', 'delete-task', 'reorder'])
+const emit = defineEmits(['toggle-complete', 'delete-task', 'reorder', 'edit'])
 
 const localTasks = computed(() => {
   return Array.isArray(props.tasks) ? props.tasks : []
@@ -78,9 +64,11 @@ const onReorder = () => {
 .drag-ghost {
   opacity: 0.4;
 }
+
 .drag-chosen {
   background-color: #e5e7eb;
 }
+
 .dark .drag-chosen {
   background-color: #374151;
 }

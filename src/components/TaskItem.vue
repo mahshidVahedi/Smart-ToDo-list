@@ -12,20 +12,33 @@
             {{ task?.title || 'بدون عنوان' }}
           </span>
         </div>
-        <button @click="$emit('delete-task', task?.id)" class="text-red-500 hover:text-red-600 text-xl transition"
-          title="حذف تسک">
-          🗑️
-        </button>
+        <div class="flex items-center gap-2">
+          <button @click="$emit('edit', task)" title="ویرایش تسک"
+            class="text-gray-500 hover:text-blue-500 text-lg transition">
+            ✏️
+          </button>
+          <button @click="$emit('delete-task', task?.id)" title="حذف تسک"
+            class="text-red-500 hover:text-red-600 text-lg transition">
+            🗑️
+          </button>
+        </div>
       </div>
 
-      <!-- ویژگی‌ها -->
       <div class="flex flex-wrap gap-2 text-sm text-gray-600 dark:text-gray-300 min-h-[28px]">
-        <span class="bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300 px-2 py-0.5 rounded-full text-xs font-bold" v-if="task?.timeRange">🕒 {{ task.timeRange.from }} - {{ task.timeRange.to }}</span>
-        <span class="bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300 px-2 py-0.5 rounded-full text-xs font-bold" v-else-if="task?.time">🕒 {{ task.time }}</span>
-        <span class="bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300 px-2 py-0.5 rounded-full text-xs font-bold" v-else>🕒 بدون زمان</span>
+        <span
+          class="bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300 px-2 py-0.5 rounded-full text-xs font-bold"
+          v-if="task?.timeRange">🕒 {{ task.timeRange.from }} - {{ task.timeRange.to }}</span>
+        <span
+          class="bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300 px-2 py-0.5 rounded-full text-xs font-bold"
+          v-else-if="task?.time">🕒 {{ task.time }}</span>
+        <span
+          class="bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300 px-2 py-0.5 rounded-full text-xs font-bold"
+          v-else>🕒 بدون زمان</span>
 
-        <span class="bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300 px-2 py-0.5 rounded-full text-xs font-bold" v-if="task?.date">📅 {{ task.date }}</span>
-        <span  v-if="!task.date"
+        <span
+          class="bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300 px-2 py-0.5 rounded-full text-xs font-bold"
+          v-if="task?.date">📅 {{ task.date }}</span>
+        <span v-if="!task.date"
           class="bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300 px-2 py-0.5 rounded-full text-xs font-bold">
           📅 بدون تاریخ
         </span>

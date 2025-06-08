@@ -12,14 +12,8 @@
     </button>
 
     <div class="flex flex-col md:flex-row gap-6 p-6 max-w-7xl mx-auto">
-      <ProjectSidebar
-        :projects="projects"
-        :selected-id="selectedProjectId"
-        @select-project="selectProject"
-        @add-project="addProject"
-        @delete-project="deleteProject"
-        @move-task-to-project="handleTaskMove"
-      />
+      <ProjectSidebar :projects="projects" :selected-id="selectedProjectId" @select-project="selectProject"
+        @add-project="addProject" @delete-project="deleteProject" @move-task-to-project="handleTaskMove" />
 
       <div class="flex-1 space-y-6 bg-gray-50 dark:bg-gray-900 p-6 rounded-2xl shadow-md">
         <h1 class="text-3xl font-bold text-center text-gray-800 dark:text-white tracking-tight">
@@ -29,25 +23,17 @@
         <TaskStats :total="totalCount" :done="doneCount" :undone="undoneCount" />
 
         <div class="flex flex-col lg:flex-row gap-6 items-start">
-          <NLPInput :project-id="selectedProjectId" @submit="handleParsedText" @toast="showToast" class="flex-1 lg:max-w-sm" />
-          <TaskForm :project-id="selectedProjectId" @submit="addTask" @toast="showToast" class="flex-1" />
+          <NLPInput :project-id="selectedProjectId" @submit="handleParsedText" @toast="showToast"
+            class="flex-1 lg:max-w-sm" />
+          <TaskForm :project-id="selectedProjectId" :is-edit-mode="isEditMode" :initial-data="selectedTask"
+            @submit="handleTaskSubmit" @toast="showToast" @cancel="resetForm" class="flex-1" />
         </div>
 
-        <FiltersBar
-          :selected-status="statusFilter"
-          :selected-priority="priorityFilter"
-          @update-status="statusFilter = $event"
-          @update-priority="priorityFilter = $event"
-        />
+        <FiltersBar :selected-status="statusFilter" :selected-priority="priorityFilter"
+          @update-status="statusFilter = $event" @update-priority="priorityFilter = $event" />
 
-        <TaskList
-          :tasks="filteredTasks"
-          :selected-project-id="selectedProjectId"
-          :projects="projects"
-          @toggle-complete="toggleComplete"
-          @delete-task="deleteTask"
-          @reorder="reorderTasks"
-        />
+        <TaskList :tasks="filteredTasks" :selected-project-id="selectedProjectId" :projects="projects"
+          @toggle-complete="toggleComplete" @delete-task="deleteTask" @reorder="reorderTasks"  @edit="startEditTask" />
       </div>
     </div>
   </div>
@@ -229,6 +215,31 @@ const showToast = (message) => {
     toastMessage.value = ''
   }, 2500)
 }
+const selectedTask = ref(null)
+const isEditMode = ref(false)
+
+const startEditTask = (task) => {
+  selectedTask.value = { ...task }
+  isEditMode.value = true
+}
+
+const handleTaskSubmit = (submittedTask) => {
+  const index = tasks.findIndex(t => t.id === submittedTask.id)
+
+  if (index !== -1) {
+    tasks[index] = { ...tasks[index], ...submittedTask }
+  } else {
+    tasks.push({
+      ...submittedTask,
+      completed: false,
+      projectId: submittedTask.projectId ?? 0
+    })
+  }
+
+  selectedTask.value = null
+  isEditMode.value = false
+}
+
 </script>
 
 <style>
@@ -236,16 +247,19 @@ const showToast = (message) => {
   background-color: #1f2937 !important;
   color: white !important;
 }
+
 :root.dark .vpd-title,
 :root.dark .vpd-header,
 :root.dark .vpd-actions {
   background-color: #111827 !important;
   color: white !important;
 }
+
 :root.dark .vpd-day.vpd-today {
   background-color: #2563eb !important;
   color: white !important;
 }
+
 :root.dark input.vpd-input {
   background-color: #374151 !important;
   color: #fff !important;

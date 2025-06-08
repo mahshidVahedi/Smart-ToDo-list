@@ -97,18 +97,29 @@ watch(
 )
 
 const handleSubmit = () => {
-  emit('submit', {
+  const payload = {
     ...form,
-    projectId: props.projectId
-  })
-  emit('toast', '✅ تسک با موفقیت افزوده شد!')
+    projectId: props.projectId,
+    id: props.initialData?.id || Date.now() 
+  }
 
-  form.title = ''
-  form.date = ''
-  form.time = ''
-  form.priority = ''
-  form.repeat = ''
+  emit('submit', payload)
+
+  const msg = props.isEditMode
+    ? '✏️ تسک با موفقیت ویرایش شد!'
+    : '✅ تسک با موفقیت افزوده شد!'
+
+  emit('toast', msg)
+
+  if (!props.isEditMode) {
+    form.title = ''
+    form.date = ''
+    form.time = ''
+    form.priority = ''
+    form.repeat = ''
+  }
 }
+
 </script>
 
 <style scoped>
