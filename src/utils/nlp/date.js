@@ -40,7 +40,7 @@ export function extractDate(text) {
   if (matchWeekdayNext) {
     const weekday = weekdayMap[matchWeekdayNext[1]]
     const date = toShamsi(getNextWeekday(weekday))
-    return { date, repeat: 'weekly', isExplicit: false }
+    return { date, repeat: '', isExplicit: true }
   }
 
   const matchRelative = normalized.match(/(\d{1,2})\s*(روز|هفته)\s*(دیگر|بعد)/)
