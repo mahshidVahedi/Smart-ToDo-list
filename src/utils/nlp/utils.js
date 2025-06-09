@@ -38,3 +38,6 @@ export function isBeforeToday(dateStr) {
 
   return taskDate.isBefore(today)
 }
+export function fromShamsi(shamsiDate) {
+  return moment(shamsiDate, 'jYYYY/jMM/jDD');
+}

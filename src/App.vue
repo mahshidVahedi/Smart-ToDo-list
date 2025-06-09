@@ -48,6 +48,7 @@ import FiltersBar from './components/FiltersBar.vue'
 import TaskStats from './components/TaskStats.vue'
 import TaskList from './components/TaskList.vue'
 import { parsePersianTask } from './utils/nlp'
+import { getNextDate } from './utils/nlp/date'
 import jalaali from 'jalaali-js'
 import { isBeforeToday } from './utils/nlp/utils'
 
@@ -141,8 +142,36 @@ const addTask = (newTask) => {
 
 const toggleComplete = (id) => {
   const task = tasks.find(t => t.id === id)
-  if (task) task.completed = !task.completed
+  if (!task) return
+
+  task.completed = !task.completed
+
+  if (
+    task.completed &&
+    task.repeat
+  ) {
+    const nextDate = getNextDate(task.date, task.repeat)
+
+    const alreadyExists = tasks.some(t =>
+      t.date === nextDate &&
+      t.repeatInstanceOf === (task.repeatInstanceOf || task.id)
+    )
+
+    if (!alreadyExists && nextDate) {
+      tasks.push({
+        ...task,
+        id: crypto.randomUUID?.() || Math.random().toString(36).slice(2),
+        date: nextDate,
+        completed: false,
+        repeatInstanceOf: task.repeatInstanceOf || task.id
+      })
+
+      showToast(`🔁 تسک تکراری برای ${nextDate} ساخته شد`)
+    }
+  }
 }
+
+
 
 const deleteTask = (id) => {
   const index = tasks.findIndex(t => t.id === id)

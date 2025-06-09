@@ -36,7 +36,7 @@ export async function parsePersianTask(text, options = {}) {
   const textWithoutDate = dateTag ? normalized.replace(dateTag.raw, '') : normalized;
 
   const detectedPriority = extractPriority(textWithoutDate);
-  const dateInfo = extractDate(normalized); // همچنان برای جزئیات کامل مثل تقویم هجری لازمه
+  const dateInfo = extractDate(normalized); 
   const repeat = dateInfo.repeat || extractRepeat(textWithoutDate);
 
   const allTimeRanges = extractTimeRanges(textWithoutDate);
