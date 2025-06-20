@@ -1,69 +1,69 @@
 <template>
   <div
-    class="flex items-center justify-between p-4 rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 border-r-8 min-h-[120px] w-full max-w-xl mx-auto"
-    :class="[priorityClass, task?.completed && 'opacity-50 line-through']">
-
-    <div class="flex flex-col gap-2 w-full">
-      <div class="flex items-center justify-between w-full">
-        <div class="flex items-center gap-3">
-          <input type="checkbox" class="w-5 h-5 accent-green-500" :checked="task?.completed"
-            @change="$emit('toggle-complete', task?.id)" @dragstart="onDragStart" />
-          <span class="text-base font-semibold text-gray-800 dark:text-white">
-            {{ task?.title || 'بدون عنوان' }}
-          </span>
-        </div>
-        <div class="flex items-center gap-2">
-          <button @click="$emit('edit', task)" title="ویرایش تسک"
-            class="text-gray-500 hover:text-blue-500 text-lg transition">
-            ✏️
-          </button>
-          <button @click="$emit('delete-task', task?.id)" title="حذف تسک"
-            class="text-red-500 hover:text-red-600 text-lg transition">
-            🗑️
-          </button>
-        </div>
-      </div>
-
-      <div class="flex flex-wrap gap-2 text-sm text-gray-600 dark:text-gray-300 min-h-[28px]">
-        <span
-          class="bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300 px-2 py-0.5 rounded-full text-xs font-bold"
-          v-if="task?.timeRange">🕒 {{ task.timeRange.from }} - {{ task.timeRange.to }}</span>
-        <span
-          class="bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300 px-2 py-0.5 rounded-full text-xs font-bold"
-          v-else-if="task?.time">🕒 {{ task.time }}</span>
-        <span
-          class="bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300 px-2 py-0.5 rounded-full text-xs font-bold"
-          v-else>🕒 بدون زمان</span>
-
-        <span
-          class="bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300 px-2 py-0.5 rounded-full text-xs font-bold"
-          v-if="task?.date">📅 {{ task.date }}</span>
-        <span v-if="!task.date"
-          class="bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300 px-2 py-0.5 rounded-full text-xs font-bold">
-          📅 بدون تاریخ
-        </span>
-
-        <span v-if="task?.priority" class="text-xs font-bold rounded-full px-2 py-0.5" :class="colorClass">
-          {{ priorityLabelMap[task.priority] || task.priority }}
-        </span>
-        <span v-else
-          class="text-xs font-bold rounded-full px-2 py-0.5 bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300">
-          🏷️ بدون اولویت
-        </span>
-
-        <span v-if="task?.repeat"
-          class="px-2 py-0.5 bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 text-xs rounded-full font-medium">
-          {{ repeatLabel }}
-        </span>
-
-        <span
-          class="text-xs font-bold rounded-full px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
-          📁 {{ projectName }}
+    class="flex flex-col gap-2 w-full max-w-xl mx-auto p-3 rounded-lg bg-white dark:bg-gray-800 shadow hover:shadow-md transition border-s-4"
+    :class="[priorityClass, task?.completed && 'opacity-50 line-through']"
+  >
+    <div class="flex items-start justify-between gap-3">
+      <div class="flex items-start gap-2">
+        <input
+          type="checkbox"
+          class="w-5 h-5 mt-1 accent-green-500"
+          :checked="task?.completed"
+          @change="$emit('toggle-complete', task?.id)"
+          @dragstart="onDragStart"
+        />
+        <span class="text-base font-semibold text-gray-800 dark:text-white break-words">
+          {{ task?.title || 'بدون عنوان' }}
         </span>
       </div>
+
+      <div class="flex gap-2 shrink-0">
+        <button
+          @click="$emit('edit', task)"
+          title="ویرایش"
+          class="text-gray-500 hover:text-blue-500 text-sm"
+        >
+          ✏️
+        </button>
+        <button
+          @click="$emit('delete-task', task?.id)"
+          title="حذف"
+          class="text-red-500 hover:text-red-600 text-sm"
+        >
+          🗑️
+        </button>
+      </div>
+    </div>
+
+    <div class="flex flex-wrap items-center gap-1 text-xs text-gray-700 dark:text-gray-300">
+      <span v-if="task?.timeRange" class="tag">🕒 {{ task.timeRange.from }} - {{ task.timeRange.to }}</span>
+      <span v-else-if="task?.time" class="tag">🕒 {{ task.time }}</span>
+      <span v-else class="tag">🕒 بدون زمان</span>
+
+      <span v-if="task?.date" class="tag">📅 {{ task.date }}</span>
+      <span v-else class="tag">📅 بدون تاریخ</span>
+
+      <!-- <span v-if="task?.priority" class="tag font-bold" :class="colorClass">
+        {{ priorityLabelMap[task.priority] || task.priority }}
+      </span>
+      <span v-else class="tag">🏷️ بدون اولویت</span> -->
+
+      <span v-if="task?.repeat" class="tag bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
+        🔁 {{ repeatLabel }}
+      </span>
+
+      <span class="tag">📁 {{ projectName }}</span>
     </div>
   </div>
 </template>
+
+
+<style scoped>
+.tag {
+  @apply px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300;
+}
+</style>
+
 
 <script setup>
 import { computed } from 'vue'
