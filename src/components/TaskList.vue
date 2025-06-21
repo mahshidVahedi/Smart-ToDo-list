@@ -1,7 +1,7 @@
 <template>
   <div class="container max-w-lg mx-auto px-4 space-y-4">
-    <draggable v-model="localTasksInternal" item-key="id" handle=".drag-handle" @end="onReorder" class="space-y-3"
-      ghost-class="drag-ghost" chosen-class="drag-chosen" animation="180">
+    <draggable v-model="localTasksInternal" item-key="id" handle=".drag-handle" @end="onReorder"
+      class="space-y-3" ghost-class="drag-ghost" chosen-class="drag-chosen" animation="180">
       <template #item="{ element }">
         <div class="flex items-start gap-2 group relative">
           <span
@@ -9,9 +9,13 @@
             title="بکش و رها کن">
             ☰
           </span>
-          <TaskItem :task="element" :projects="projects" @toggle-complete="$emit('toggle-complete', element.id)"
-            @delete-task="$emit('delete-task', element.id)" @edit="$emit('edit', element)" />
-
+          <TaskItem
+            :task="element"
+            :projects="projects"
+            @toggle-complete="toggleComplete(element.id)"
+            @delete-task="deleteTask(element.id)"
+            @edit="startEditTask(element)"
+          />
         </div>
       </template>
     </draggable>
@@ -30,19 +34,19 @@
 </template>
 
 <script setup>
-import { ref, watch, computed } from 'vue'
+import { ref, watch, computed, inject } from 'vue'
+import { useTaskStore } from '../store/tasks'
 import TaskItem from './TaskItem.vue'
 import draggable from 'vuedraggable'
 
-const props = defineProps({
-  tasks: Array,
-  projects: Array
-})
+const taskStore = useTaskStore()
 
-const emit = defineEmits(['toggle-complete', 'delete-task', 'reorder', 'edit'])
+const filteredTasks = inject('filteredTasks') || computed(() => taskStore.tasks)
+
+const projects = computed(() => taskStore.projects)
 
 const localTasks = computed(() => {
-  return Array.isArray(props.tasks) ? props.tasks : []
+  return Array.isArray(filteredTasks.value) ? filteredTasks.value : []
 })
 
 const localTasksInternal = ref([])
@@ -55,8 +59,17 @@ watch(
   { immediate: true }
 )
 
+const toggleComplete = (id) => {
+  taskStore.toggleComplete(id)
+}
+
+const deleteTask = (id) => {
+  taskStore.deleteTask(id)
+}
+
+const startEditTask = inject('startEditTask') 
 const onReorder = () => {
-  emit('reorder', [...localTasksInternal.value])
+  taskStore.reorderTasks([...localTasksInternal.value])
 }
 </script>
 

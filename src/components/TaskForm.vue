@@ -104,9 +104,12 @@
 </template>
 
 <script setup>
-import { onMounted, onBeforeUnmount } from 'vue'
-import { reactive, ref, watch, defineAsyncComponent } from 'vue'
+import { onMounted, onBeforeUnmount, ref, reactive, watch, inject } from 'vue'
+import { useTaskStore } from '../store/tasks'
+import { parsePersianTask } from '../utils/nlp'
+import { defineAsyncComponent } from 'vue'
 
+const taskStore = useTaskStore()
 const PersianDatePicker = defineAsyncComponent(() => import('vue3-persian-datetime-picker'))
 
 const props = defineProps({
@@ -115,7 +118,7 @@ const props = defineProps({
   projectId: Number
 })
 
-const emit = defineEmits(['submit', 'cancel', 'toast'])
+const emit = defineEmits(['cancel', 'toast'])
 
 const form = reactive({
   title: '',
@@ -138,25 +141,23 @@ const toggleDate = () => {
   showDate.value = !showDate.value
   showTime.value = false
 }
-
 const toggleTime = () => {
   showTime.value = !showTime.value
   showDate.value = false
 }
-
 const confirmTime = () => {
-  const h = selectedHour.value.toString().padStart(2, '0');
-  const m = selectedMinute.value.toString().padStart(2, '0');
-  form.time = `${h}:${m}`;
-  showTime.value = false;
-};
+  const h = selectedHour.value.toString().padStart(2, '0')
+  const m = selectedMinute.value.toString().padStart(2, '0')
+  form.time = `${h}:${m}`
+  showTime.value = false
+}
 
 watch(
   () => props.initialData,
   (newVal) => {
     if (newVal && props.isEditMode) {
       form.title = newVal.title || ''
-      form.date = newVal.date || '';
+      form.date = newVal.date || ''
       tempDate.value = newVal.date || ''
       form.time = newVal.time || ''
       form.priority = newVal.priority || ''
@@ -167,98 +168,97 @@ watch(
 )
 
 const togglePriority = () => {
-  showPriority.value = !showPriority.value;
-  showRepeat.value = false;
-  showDate.value = false;
-  showTime.value = false;
-};
-
+  showPriority.value = !showPriority.value
+  showRepeat.value = false
+  showDate.value = false
+  showTime.value = false
+}
 const toggleRepeat = () => {
-  showRepeat.value = !showRepeat.value;
-  showPriority.value = false;
-  showDate.value = false;
-  showTime.value = false;
-};
-
-const timeRef = ref(null);
-const priorityRef = ref(null);
-const repeatRef = ref(null);
-
-function handleClickOutside(e) {
-  if (showTime.value && timeRef.value && !timeRef.value.contains(e.target)) showTime.value = false;
-  if (showPriority.value && priorityRef.value && !priorityRef.value.contains(e.target)) showPriority.value = false;
-  if (showRepeat.value && repeatRef.value && !repeatRef.value.contains(e.target)) showRepeat.value = false;
+  showRepeat.value = !showRepeat.value
+  showPriority.value = false
+  showDate.value = false
+  showTime.value = false
 }
 
-onMounted(() => document.addEventListener('mousedown', handleClickOutside));
-onBeforeUnmount(() => document.removeEventListener('mousedown', handleClickOutside));
+const timeRef = ref(null)
+const priorityRef = ref(null)
+const repeatRef = ref(null)
 
-const nlpText = ref('');
-const nlpError = ref('');
+function handleClickOutside(e) {
+  if (showTime.value && timeRef.value && !timeRef.value.contains(e.target)) showTime.value = false
+  if (showPriority.value && priorityRef.value && !priorityRef.value.contains(e.target)) showPriority.value = false
+  if (showRepeat.value && repeatRef.value && !repeatRef.value.contains(e.target)) showRepeat.value = false
+}
 
-import { parsePersianTask } from '../utils/nlp';
+onMounted(() => document.addEventListener('mousedown', handleClickOutside))
+onBeforeUnmount(() => document.removeEventListener('mousedown', handleClickOutside))
+
+const nlpText = ref('')
+const nlpError = ref('')
 
 const handleNLPSubmit = async () => {
-  const trimmed = form.title.trim();
+  const trimmed = form.title.trim()
   if (!trimmed) {
-    nlpError.value = 'لطفاً یک جمله وارد کنید';
-    return;
+    nlpError.value = 'لطفاً یک جمله وارد کنید'
+    return
   }
 
-  nlpError.value = '';
-  const parsedTasks = await parsePersianTask(trimmed);
+  nlpError.value = ''
+  const parsedTasks = await parsePersianTask(trimmed)
 
   if (!parsedTasks.length) {
-    nlpError.value = 'متنی برای ساخت تسک قابل‌تشخیص نبود';
-    return;
+    nlpError.value = 'متنی برای ساخت تسک قابل‌تشخیص نبود'
+    return
   }
 
   for (const task of parsedTasks) {
-    emit('submit', {
+    taskStore.addTask({
       ...task,
       id: Date.now() + Math.floor(Math.random() * 1000),
       completed: false,
-      projectId: props.projectId >= 1 ? props.projectId : 0
-    });
+      projectId: props.projectId ?? 0
+    })
   }
 
-  emit('toast', '✅ تسک(ها) با موفقیت از متن ساخته شد!');
-  form.title = '';
-};
+  emit('toast', '✅ تسک(ها) با موفقیت از متن ساخته شد!')
+  form.title = ''
+}
 
 const handleSubmit = () => {
-  const trimmed = form.title.trim();
-  if (!trimmed) {
-    return;
-  }
+  const trimmed = form.title.trim()
+  if (!trimmed) return
 
   const payload = {
     ...form,
     title: trimmed,
-    projectId: props.projectId,
+    projectId: props.projectId ?? 0,
     id: props.initialData?.id || Date.now()
-  };
-
-  emit('submit', payload);
-
-  const msg = props.isEditMode
-    ? '✏️ تسک با موفقیت ویرایش شد!'
-    : '✅ تسک با موفقیت افزوده شد!';
-
-  emit('toast', msg);
-
-  if (!props.isEditMode) {
-    form.title = '';
-    form.date = '';
-    form.time = '';
-    form.priority = '';
-    form.repeat = '';
   }
 
-  showDate.value = false;
-  showTime.value = false;
-};
+  if (props.isEditMode) {
+    taskStore.updateTask(payload)
+    emit('toast', '✏️ تسک با موفقیت ویرایش شد!')
+  } else {
+    taskStore.addTask({
+      ...payload,
+      completed: false
+    })
+    emit('toast', '✅ تسک با موفقیت افزوده شد!')
+  }
+
+  if (!props.isEditMode) {
+    form.title = ''
+    form.date = ''
+    form.time = ''
+    form.priority = ''
+    form.repeat = ''
+  }
+
+  showDate.value = false
+  showTime.value = false
+}
 </script>
+
 
 <style scoped>
 .form-wrapper {

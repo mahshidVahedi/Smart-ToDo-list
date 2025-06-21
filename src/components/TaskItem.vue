@@ -9,7 +9,7 @@
           type="checkbox"
           class="w-5 h-5 mt-1 accent-green-500"
           :checked="task?.completed"
-          @change="$emit('toggle-complete', task?.id)"
+          @input="toggleComplete"
           @dragstart="onDragStart"
         />
         <span class="text-base font-semibold text-gray-800 dark:text-white break-words">
@@ -19,14 +19,14 @@
 
       <div class="flex gap-2 shrink-0">
         <button
-          @click="$emit('edit', task)"
+          @click="startEdit"
           title="ویرایش"
           class="text-gray-500 hover:text-blue-500 text-sm"
         >
           ✏️
         </button>
         <button
-          @click="$emit('delete-task', task?.id)"
+          @click="deleteTask"
           title="حذف"
           class="text-red-500 hover:text-red-600 text-sm"
         >
@@ -43,11 +43,6 @@
       <span v-if="task?.date" class="tag">📅 {{ task.date }}</span>
       <span v-else class="tag">📅 بدون تاریخ</span>
 
-      <!-- <span v-if="task?.priority" class="tag font-bold" :class="colorClass">
-        {{ priorityLabelMap[task.priority] || task.priority }}
-      </span>
-      <span v-else class="tag">🏷️ بدون اولویت</span> -->
-
       <span v-if="task?.repeat" class="tag bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
         🔁 {{ repeatLabel }}
       </span>
@@ -57,57 +52,40 @@
   </div>
 </template>
 
-
-<style scoped>
-.tag {
-  @apply px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300;
-}
-</style>
-
-
 <script setup>
-import { computed } from 'vue'
+import { computed, inject } from 'vue'
+import { useTaskStore } from '../store/tasks'
 
 const props = defineProps({
-  task: Object,
-  projects: Array
+  task: Object
 })
 
-const priorityLabelMap = {
-  low: 'کم',
-  medium: 'متوسط',
-  important: 'مهم',
-  high: 'فوری',
-  'کم': 'کم',
-  'متوسط': 'متوسط',
-  'مهم': 'مهم',
-  'فوری': 'فوری',
-}
+const taskStore = useTaskStore()
 
-const priorityColor = {
-  low: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300',
-  medium: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300',
-  important: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300',
-  high: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300',
-}
+const startEditTask = inject('startEditTask') 
 
-const priorityClass = computed(() => {
-  const p = props.task?.priority
-  const map = {
-    'فوری': 'border-r-red-500 bg-red-50 dark:bg-red-900/10',
-    'مهم': 'border-r-orange-500 bg-orange-50 dark:bg-orange-900/10',
-    'متوسط': 'border-r-yellow-500 bg-yellow-50 dark:bg-yellow-900/10',
-    'کم': 'border-r-green-500 bg-green-50 dark:bg-green-900/10',
-    'high': 'border-r-red-500 bg-red-50 dark:bg-red-900/10',
-    'important': 'border-r-orange-500 bg-orange-50 dark:bg-orange-900/10',
-    'medium': 'border-r-yellow-500 bg-yellow-50 dark:bg-yellow-900/10',
-    'low': 'border-r-green-500 bg-green-50 dark:bg-green-900/10',
+const toggleCompleteFromApp = inject('toggleComplete')
+
+const toggleComplete = () => {
+  if (toggleCompleteFromApp) {
+    toggleCompleteFromApp(props.task.id)
   }
-  return map[p] || 'border-r-gray-300 bg-white dark:bg-gray-800'
-})
+}
 
-const colorClass = computed(() => {
-  return priorityColor[props.task?.priority] || 'bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300'
+
+const deleteTask = () => {
+  taskStore.deleteTask(props.task.id)
+}
+
+const startEdit = () => {
+  if (startEditTask) {
+    startEditTask(props.task)
+  }
+}
+
+const projectName = computed(() => {
+  const found = taskStore.projects?.find(p => p.id === props.task?.projectId)
+  return found ? found.name : 'نامشخص'
 })
 
 const repeatLabel = computed(() => {
@@ -119,12 +97,28 @@ const repeatLabel = computed(() => {
   return ''
 })
 
-const projectName = computed(() => {
-  const found = props.projects?.find(p => p.id === props.task?.projectId)
-  return found ? found.name : 'نامشخص'
+const priorityClass = computed(() => {
+  const p = props.task?.priority
+  const map = {
+    'فوری': 'border-r-red-500 bg-red-50 dark:bg-red-900/10',
+    'مهم': 'border-r-orange-500 bg-orange-50 dark:bg-orange-900/10',
+    'متوسط': 'border-r-yellow-500 bg-yellow-50 dark:bg-yellow-900/10',
+    'کم': 'border-r-green-500 bg-green-50 dark:bg-green-900/10',
+    'high': 'border-r-red-500 bg-red-50 dark:bg-red-900/10',
+    'important': 'border-r-orange-500 bg-orange-50 dark:bg-orange-900/10',
+    'medium': 'border-r-yellow-500 bg-yellow-50 dark:bg-yellow-900/10',
+    'low': 'border-r-green-500 bg-green-50 dark:bg-green-900/10'
+  }
+  return map[p] || 'border-r-gray-300 bg-white dark:bg-gray-800'
 })
 
 const onDragStart = (e) => {
   e.dataTransfer.setData('text/plain', props.task?.id)
 }
 </script>
+
+<style scoped>
+.tag {
+  @apply px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300;
+}
+</style>

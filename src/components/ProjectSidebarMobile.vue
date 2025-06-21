@@ -1,10 +1,7 @@
 <template>
   <transition name="mobile-sidebar">
     <div v-if="visible" class="fixed inset-0 z-50">
-      <div
-        class="absolute inset-0 bg-black/50"
-        @click="closeSidebar"
-      ></div>
+      <div class="absolute inset-0 bg-black/50" @click="closeSidebar"></div>
 
       <aside
         class="absolute right-0 top-0 h-full w-72 max-w-[85%] bg-white dark:bg-gray-900 shadow-xl flex flex-col gap-4 p-5 z-50 transition-transform duration-300 ease-in-out"
@@ -47,7 +44,7 @@
             <span class="truncate">{{ project.name }}</span>
             <button
               v-if="project.id > 0"
-              @click.stop="$emit('delete-project', project.id)"
+              @click.stop="deleteProject(project.id)"
               class="ml-auto text-red-500 hover:text-red-700 dark:hover:text-red-400 text-sm"
             >
               🗑️
@@ -76,22 +73,16 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { useTaskStore } from '../store/tasks'
 
-const props = defineProps({
-  projects: Array,
-  selectedId: Number,
-  isDark: Boolean
-})
-const emit = defineEmits([
-  'select-project',
-  'add-project',
-  'delete-project',
-  'toggle-theme',
-  'close'
-])
+const taskStore = useTaskStore()
+const emit = defineEmits(['toggle-theme', 'close'])
 
 const visible = ref(true)
 const newProject = ref('')
+
+const isDark = computed(() => localStorage.getItem('theme') === 'dark')
+const selectedId = computed(() => taskStore.selectedProjectId)
 
 const fixedProjects = [
   { id: 0, name: 'همه تسک‌ها', icon: '🗂️' },
@@ -99,17 +90,22 @@ const fixedProjects = [
   { id: -2, name: 'انجام‌شده‌ها', icon: '✅' },
   { id: -3, name: 'از دست رفته‌ها', icon: '❌' },
 ]
-const fullProjectList = computed(() => [...fixedProjects, ...props.projects])
+
+const fullProjectList = computed(() => [...fixedProjects, ...taskStore.projects])
 
 const addProject = () => {
   if (newProject.value.trim()) {
-    emit('add-project', newProject.value.trim())
+    taskStore.addProject(newProject.value.trim())
     newProject.value = ''
   }
 }
 
+const deleteProject = (id) => {
+  taskStore.deleteProject(id)
+}
+
 const selectProject = (id) => {
-  emit('select-project', id)
+  taskStore.selectProject(id)
   emit('close')
 }
 

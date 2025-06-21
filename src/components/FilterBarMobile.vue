@@ -21,7 +21,9 @@
           <option value="">همه</option>
           <option value="low">کم</option>
           <option value="medium">متوسط</option>
-          <option value="high">زیاد</option>
+          <option value="important">مهم</option>
+          <option value="high">فوری</option>
+
         </select>
       </label>
     </div>
