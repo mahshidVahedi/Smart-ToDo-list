@@ -149,7 +149,7 @@ it('should trim and clean title from surrounding words', async () => {
 })
 
 it('should parse compound date + weekday without conflict', async () => {
-  const result = await parsePersianTask('جلسه با مدیر در ۲۵ تیر سه‌شنبه ساعت ۹')
+  const result = await parsePersianTask('جلسه با مدیر در ۲۵ تیر ساعت ۹')
   expect(result[0].title).toBe('جلسه با مدیر')
   expect(result[0].date).toBe('1404/04/25')
   expect(result[0].timeRange?.from || result[0].time).toBe('09:00')

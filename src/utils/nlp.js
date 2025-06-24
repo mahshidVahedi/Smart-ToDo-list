@@ -30,54 +30,30 @@ export async function parsePersianTask(text, options = {}) {
   if (!text || !text.trim()) return [];
 
   const normalized = normalizeText(text);
-  const tags = tagNumbers(normalized);
 
-  const dateTag = tags.find(t => t.type === 'date');
-  const textWithoutDate = dateTag ? normalized.replace(dateTag.raw, '') : normalized;
+  const detectedPriority = extractPriority(normalized);
+  const defaultDateInfo = extractDate(normalized);
+  const repeat = defaultDateInfo.repeat || extractRepeat(normalized);
 
-  const detectedPriority = extractPriority(textWithoutDate);
-  const dateInfo = extractDate(normalized);
-  const repeat = dateInfo.repeat || extractRepeat(textWithoutDate);
-
-  const allTimeRanges = extractTimeRanges(textWithoutDate);
-
-  const parts = textWithoutDate
+  const parts = normalized
     .split(/[,،]|(?:\s+و\s+)|\n+/g)
     .map(p => p.trim())
     .filter(p => p.length > 1);
 
-  if (allTimeRanges.length > 1) {
-    return parts.map((part) => {
-      const range = extractTimeRange(part);
-      return {
-        title: extractTitle(part, {
-          date: dateInfo.date,
-          timeRange: range,
-          priority: detectedPriority,
-          repeat
-        }),
-        date: dateInfo.date,
-        time: null,
-        timeRange: range,
-        priority: 'priority' in options ? options.priority : detectedPriority,
-        repeat
-      };
-    });
-  }
-
   return parts.map((part) => {
+    const partDateInfo = extractDate(part);
     const partTimeRange = extractTimeRange(part);
-    const partTime = partTimeRange ? null : extractTime(part, { context: normalized }) || null;
+    const partTime = partTimeRange ? null : extractTime(part, { context: normalized });
 
     return {
       title: extractTitle(part, {
-        date: dateInfo.date,
+        date: partDateInfo?.date || defaultDateInfo?.date,
         timeRange: partTimeRange,
         time: partTime,
         priority: detectedPriority,
         repeat
       }),
-      date: dateInfo.date,
+      date: partDateInfo?.date || defaultDateInfo?.date,
       time: partTime,
       timeRange: partTimeRange,
       priority: 'priority' in options ? options.priority : detectedPriority,
@@ -85,3 +61,4 @@ export async function parsePersianTask(text, options = {}) {
     };
   });
 }
+
