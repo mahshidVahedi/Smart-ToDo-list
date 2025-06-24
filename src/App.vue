@@ -190,6 +190,7 @@ const toggleComplete = (id) => {
       taskStore.addTask({
         id: crypto.randomUUID?.() || Math.random().toString(36).slice(2),
         title: task.title,
+        time: task.time,
         date: nextDate,
         completed: false,
         repeat: task.repeat,
