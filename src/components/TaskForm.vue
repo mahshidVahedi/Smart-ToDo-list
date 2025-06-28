@@ -1,38 +1,22 @@
 <template>
-  <form @submit.prevent="handleSubmit" class="form-wrapper space-y-6 max-w-2xl mx-auto bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md border border-gray-200 dark:border-gray-700">
+  <form @submit.prevent="handleSubmit"
+    class="form-wrapper space-y-6 max-w-2xl mx-auto bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md border border-gray-200 dark:border-gray-700">
     <div v-if="!manualMode && !isEditMode">
       <!-- <label class="form-label"> ورودی متن هوشمند</label> -->
-      <textarea
-        v-model="form.title"
-        class="title-input resize-y min-h-[100px]"
-        placeholder="مثلاً: فردا ورزش ساعت 6 عصر، خرید هر هفته، مطالعه هر روز ساعت 22"
-        required
-      ></textarea>
+      <textarea v-model="form.title" class="title-input resize-y min-h-[100px]"
+        placeholder="مثلاً: فردا ورزش ساعت 6 عصر، خرید هر هفته، مطالعه هر روز ساعت 22" required></textarea>
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mt-4">
-        <button
-          type="button"
-          @click="handleNLPSubmit"
-          class="nlp-btn w-full sm:w-auto"
-        >✨ ساخت تسک از متن</button>
+        <button type="button" @click="handleNLPSubmit" class="nlp-btn w-full sm:w-auto">✨ ساخت تسک از متن</button>
 
-        <button
-          @click="manualMode = true"
-          type="button"
-          class="text-sm text-blue-600 dark:text-blue-400 w-full sm:w-auto"
-        >🛠 رفتن به تنظیمات دستی</button>
+        <button @click="manualMode = true" type="button"
+          class="text-sm text-blue-600 dark:text-blue-400 w-full sm:w-auto">🛠 رفتن به تنظیمات دستی</button>
       </div>
     </div>
     <div v-else>
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
         <div class="sm:col-span-2">
           <label class="form-label">عنوان تسک</label>
-          <input
-            v-model="form.title"
-            type="text"
-            class="input-style"
-            placeholder="مثلاً: تمرین فوتبال"
-            required
-          />
+          <input v-model="form.title" type="text" class="input-style" placeholder="مثلاً: تمرین فوتبال" required />
         </div>
 
         <div>
@@ -69,19 +53,10 @@
 
         <div>
           <label class="form-label">📅 تاریخ</label>
-          <PersianDatePicker
-            v-model="form.date"
-            input-class="dark-datepicker-global"
-            display-format="jYYYY/jMM/jDD"
-            format="jYYYY/jMM/jDD"
-            locale="fa"
-            color="blue"
-            :z-index="9999"
-            :auto-submit="false"
-            :position="'auto'"
-            attach="body"
-            :show-buttons="true"
-          />
+          <PersianDatePicker v-model="form.date" input-class="vpd-input" display-format="jYYYY/jMM/jDD"
+            format="jYYYY/jMM/jDD" locale="fa" color="blue" :z-index="9999" :auto-submit="false" :position="'auto'"
+            attach="body" :show-buttons="true" />
+
         </div>
       </div>
 
@@ -89,18 +64,10 @@
         <button type="submit" class="submit-btn w-full sm:w-auto">
           {{ isEditMode ? 'تأیید ویرایش' : 'افزودن تسک' }}
         </button>
-        <button
-          v-if="!isEditMode"
-          type="button"
-          class="cancel-btn w-full sm:w-auto"
-          @click="manualMode = false"
-        >↩️ بازگشت به تنظیمات هوشمند</button>
-        <button
-          v-if="isEditMode"
-          type="button"
-          class="cancel-btn w-full sm:w-auto"
-          @click="handleCancel"
-        >انصراف</button>
+        <button v-if="!isEditMode" type="button" class="cancel-btn w-full sm:w-auto" @click="manualMode = false">↩️
+          بازگشت به تنظیمات هوشمند</button>
+        <button v-if="isEditMode" type="button" class="cancel-btn w-full sm:w-auto"
+          @click="handleCancel">انصراف</button>
       </div>
     </div>
   </form>
@@ -239,29 +206,37 @@ const handleSubmit = () => {
 </style>
 
 <style>
+.vpd-input {
+  background-color: #fff;
+  color: #1f2937;
+  border: 1px solid #d1d5db;
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  width: 100%;
+  outline: none;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+html.dark .vpd-input {
+  background-color: #374151;
+  color: #f9fafb;
+  border-color: #4b5563;
+}
+
 html.dark .vpd-content {
-  background-color: #1f2937 !important;
-  color: white !important;
+  background-color: #1f2937;
+  color: white;
 }
 html.dark .vpd-title,
 html.dark .vpd-header,
 html.dark .vpd-actions {
-  background-color: #111827 !important;
-  color: white !important;
+  background-color: #111827;
+  color: white;
 }
 html.dark .vpd-day.vpd-today {
-  background-color: #2563eb !important;
-  color: white !important;
+  background-color: #2563eb;
+  color: white;
 }
-html.dark input.vpd-input,
-.dark-datepicker-global {
-  background-color: #374151 !important;
-  color: #fff !important;
-  border: 1px solid #4b5563 !important;
-  padding: 0.5rem 1rem;
-  border-radius: 0.375rem;
-  width: 100%;
-  font-size: 0.875rem;
-  outline: none;
-}
+
 </style>
