@@ -75,7 +75,6 @@
 
 <script setup>
 import { ref, reactive, watch } from 'vue'
-import { useTaskStore } from '../store/tasks'
 import { parsePersianTask } from '../utils/nlp'
 import PersianDatePicker from 'vue3-persian-datetime-picker'
 
@@ -85,8 +84,7 @@ const props = defineProps({
   projectId: Number
 })
 
-const emit = defineEmits(['toast', 'cancel'])
-const taskStore = useTaskStore()
+const emit = defineEmits(['toast', 'cancel', 'submit'])
 
 const form = reactive({
   title: '',
@@ -120,14 +118,7 @@ watch(
 
 const handleCancel = () => {
   emit('cancel')
-  form.title = ''
-  form.date = ''
-  form.time = ''
-  form.priority = ''
-  form.repeat = ''
-  selectedHour.value = 8
-  selectedMinute.value = 0
-  manualMode.value = false
+  resetForm()
 }
 
 const handleNLPSubmit = async () => {
@@ -138,7 +129,7 @@ const handleNLPSubmit = async () => {
   if (!parsedTasks.length) return emit('toast', 'متنی برای ساخت تسک قابل‌تشخیص نبود')
 
   parsedTasks.forEach(task => {
-    taskStore.addTask({
+    emit('submit', {
       ...task,
       id: Date.now() + Math.floor(Math.random() * 1000),
       completed: false,
@@ -147,27 +138,39 @@ const handleNLPSubmit = async () => {
   })
 
   emit('toast', '✨ تسک‌(ها) با موفقیت از متن ساخته شد!')
-  form.title = ''
+  resetForm()
+  manualMode.value = false
 }
 
 const handleSubmit = () => {
+  const trimmedTitle = form.title?.trim() || ''
+
+  if (!trimmedTitle) {
+    emit('toast', '❗ لطفاً عنوان تسک را وارد کنید.')
+    return
+  }
+
   const payload = {
     ...form,
-    title: form.title.trim(),
+    title: trimmedTitle,
     projectId: props.projectId ?? 0,
     id: props.initialData?.id || Date.now(),
     completed: false,
     time: `${selectedHour.value.toString().padStart(2, '0')}:${selectedMinute.value.toString().padStart(2, '0')}`
   }
 
-  if (props.isEditMode) {
-    taskStore.updateTask(payload)
-    emit('toast', '✏️ تسک با موفقیت ویرایش شد!')
-  } else {
-    taskStore.addTask(payload)
-    emit('toast', '✅ تسک با موفقیت افزوده شد!')
-  }
+  emit('submit', payload)
 
+  if (!props.isEditMode) {
+    emit('toast', '✅ تسک با موفقیت افزوده شد!')
+    resetForm()
+    manualMode.value = false
+  } else {
+    emit('toast', '✏️ تسک با موفقیت ویرایش شد!')
+  }
+}
+
+const resetForm = () => {
   form.title = ''
   form.date = ''
   form.time = ''
@@ -175,9 +178,9 @@ const handleSubmit = () => {
   form.repeat = ''
   selectedHour.value = 8
   selectedMinute.value = 0
-  manualMode.value = false
 }
 </script>
+
 
 <style scoped>
 .title-input {
