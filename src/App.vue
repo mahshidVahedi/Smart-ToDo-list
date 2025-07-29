@@ -21,11 +21,14 @@
       class="fixed bottom-6 left-1/2 -translate-x-1/2 px-4 py-2 bg-green-600 text-white rounded-xl shadow z-50">
       {{ toastMessage }}
     </div>
-
+<div class="hidden md:block fixed top-2  z-50">
+  <GoogleSync />
     <button @click="toggleDark"
-      class="hidden md:block fixed top-4 left-4 z-50 p-2 px-3 text-sm font-medium bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-700 rounded-full shadow hover:scale-105 transition">
+      class="hidden md:block fixed top-6 left-5 z-50 p-2 px-3 text-sm font-medium bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-700 rounded-full shadow hover:scale-105 transition">
       {{ isDark ? '☀️ روشن' : '🌙 تاریک' }}
     </button>
+    
+</div>
 
     <button v-if="!sidebarOpen" @click="sidebarOpen = true"
       class="md:hidden fixed top-4 right-4 z-50 p-2 px-3 text-sm font-medium bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-700 rounded-full shadow hover:scale-105 transition">
@@ -71,6 +74,7 @@
       </div>
     </div>
   </div>
+
 </template>
 
 <script setup>
@@ -83,6 +87,7 @@ import TaskStats from './components/TaskStats.vue'
 import TaskList from './components/TaskList.vue'
 import ProjectSidebarMobile from './components/ProjectSidebarMobile.vue'
 import FilterBarMobile from './components/FilterBarMobile.vue'
+import GoogleSync from './components/GoogleSync.vue'
 import { getNextDate } from './utils/nlp/date'
 import { isBeforeToday } from './utils/nlp/utils'
 import jalaali from 'jalaali-js'

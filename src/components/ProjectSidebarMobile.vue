@@ -20,12 +20,14 @@
         </div>
 
         <div class="mt-2">
+          <google-sync />
           <button
             @click="$emit('toggle-theme')"
             class="w-full py-3 text-base font-medium bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 rounded-xl shadow hover:scale-[1.02] transition"
           >
             {{ isDark ? '☀️ روشن' : '🌙 تاریک' }}
           </button>
+          
         </div>
 
         <ul class="flex-1 overflow-y-auto space-y-2 mt-2 pr-1">
@@ -74,7 +76,7 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useTaskStore } from '../store/tasks'
-
+import GoogleSync from './GoogleSync.vue'
 const taskStore = useTaskStore()
 const emit = defineEmits(['toggle-theme', 'close'])
 
