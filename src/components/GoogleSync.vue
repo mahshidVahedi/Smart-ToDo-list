@@ -27,17 +27,6 @@
   </div>
 </template>
 
-<style scoped>
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.3s ease;
-}
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
-}
-</style>
-
 <script setup>
 import { ref, watch, onMounted } from 'vue'
 import { gapi } from 'gapi-script'
@@ -51,7 +40,22 @@ const toastMessage = ref('')
 const userInfo = ref(null)
 let tokenClient = null
 
+const waitForGoogleIdentity = () => {
+  return new Promise((resolve) => {
+    const check = () => {
+      if (window.google && window.google.accounts && window.google.accounts.oauth2) {
+        resolve()
+      } else {
+        setTimeout(check, 100)
+      }
+    }
+    check()
+  })
+}
+
 const initGoogleApi = async () => {
+  await waitForGoogleIdentity()
+
   return new Promise((resolve, reject) => {
     gapi.load('client', async () => {
       try {
@@ -70,18 +74,21 @@ const initGoogleApi = async () => {
               localStorage.setItem('googleAccessToken', tokenResponse.access_token)
               isGoogleLoggedIn.value = true
               await fetchUserInfo(tokenResponse.access_token)
+
               const choice = localStorage.getItem('googleSyncChoice')
               if (choice === null) {
                 showPrompt.value = true
               } else if (choice === 'yes') {
                 syncAllTasks()
               }
+
               resolve()
             } else {
               reject('No access token')
             }
           }
         })
+
         resolve()
       } catch (err) {
         reject(err)
@@ -119,17 +126,17 @@ const handleLogout = () => {
   showToast('از حساب گوگل خارج شدید')
 }
 
+const cancelSyncPrompt = () => {
+  localStorage.setItem('googleSyncChoice', 'no')
+  showPrompt.value = false
+}
+
 const syncAllTasks = async () => {
   showPrompt.value = false
   const tasks = taskStore.tasks
   for (const task of tasks) {
     await syncSingleTask(task)
   }
-}
-
-const cancelSyncPrompt = () => {
-  localStorage.setItem('googleSyncChoice', 'no')
-  showPrompt.value = false
 }
 
 const syncSingleTask = async (task) => {
@@ -195,3 +202,14 @@ const showToast = (msg) => {
   setTimeout(() => (toastMessage.value = ''), 2500)
 }
 </script>
+
+<style scoped>
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+</style>
