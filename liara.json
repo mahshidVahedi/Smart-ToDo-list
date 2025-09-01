@@ -2,9 +2,7 @@
   "app": "todo-kntu",
   "platform": "vue",
   "port": 3000,
-  "build": {
-    "location": "iran"
-  },
+  "build": { "location": "iran" },
   "disks": [],
   "headers": [
     {
@@ -12,7 +10,7 @@
       "headers": [
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://apis.google.com https://accounts.google.com https://www.gstatic.com; connect-src 'self' https://www.googleapis.com https://openidconnect.googleapis.com; img-src * data:; style-src 'self' 'unsafe-inline'; frame-src https://accounts.google.com"
+          "value": "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://apis.google.com https://accounts.google.com https://www.gstatic.com; connect-src 'self' https://www.googleapis.com https://openidconnect.googleapis.com https://accounts.google.com https://oauth2.googleapis.com; img-src * data:; style-src 'self' 'unsafe-inline'; frame-src https://accounts.google.com"
         }
       ]
     }

@@ -2,40 +2,53 @@ import { defineStore } from 'pinia'
 
 export const useTaskStore = defineStore('task', {
   state: () => ({
-    tasks: JSON.parse(localStorage.getItem('todo-tasks')) || [],
+    tasks: (() => {
+      const raw = JSON.parse(localStorage.getItem('todo-tasks')) || []
+      return raw.map(normalizeTask)
+    })(),
     projects: JSON.parse(localStorage.getItem('todo-projects')) || [{ id: 2, name: 'شخصی' }],
     selectedProjectId: 0
   }),
 
   actions: {
     addTask(task) {
-      this.tasks.push(task)
+      const t = normalizeTask(task)
+      if (!t.id) t.id = Date.now().toString()
+      this.tasks.push(t)
       this.saveTasks()
     },
+
     updateTask(updatedTask) {
       const i = this.tasks.findIndex(t => t.id === updatedTask.id)
-      if (i !== -1) this.tasks[i] = { ...this.tasks[i], ...updatedTask }
-      this.saveTasks()
+      if (i !== -1) {
+        this.tasks[i] = normalizeTask({ ...this.tasks[i], ...updatedTask })
+        this.saveTasks()
+      }
     },
+
     deleteTask(id) {
       this.tasks = this.tasks.filter(t => t.id !== id)
       this.saveTasks()
     },
+
     toggleComplete(id) {
       const task = this.tasks.find(t => t.id === id)
       if (!task) return
       task.completed = !task.completed
       this.saveTasks()
     },
+
     reorderTasks(newList, pid) {
       const otherTasks = this.tasks.filter(t => !(pid === 0 || t.projectId === pid))
-      this.tasks = [...otherTasks, ...newList]
+      this.tasks = [...otherTasks, ...newList.map(normalizeTask)]
       this.saveTasks()
     },
+
     addProject(name) {
       this.projects.push({ id: Date.now(), name })
       this.saveProjects()
     },
+
     deleteProject(id) {
       this.projects = this.projects.filter(p => p.id !== id)
       this.tasks = this.tasks.filter(t => t.projectId !== id)
@@ -46,14 +59,53 @@ export const useTaskStore = defineStore('task', {
         this.selectedProjectId = 0
       }
     },
+
     selectProject(id) {
       this.selectedProjectId = id
     },
+
     saveTasks() {
       localStorage.setItem('todo-tasks', JSON.stringify(this.tasks))
     },
+
     saveProjects() {
       localStorage.setItem('todo-projects', JSON.stringify(this.projects))
+    },
+
+    updateTaskFromSync(localId, patch) {
+      const i = this.tasks.findIndex(t => t.id === localId)
+      if (i === -1) return
+      const allowed = pick(patch, [
+        'googleTaskId',
+        'googleEventId',
+      ])
+      this.tasks[i] = { ...this.tasks[i], ...allowed }
+      this.saveTasks()
+    },
+
+    migrateTasksMeta() {
+      let changed = false
+      this.tasks = this.tasks.map(t => {
+        const nt = normalizeTask(t)
+        if (nt !== t) changed = true
+        return nt
+      })
+      if (changed) this.saveTasks()
     }
   }
 })
+
+
+function normalizeTask(task) {
+  const t = { ...task }
+  if (t.googleTaskId === undefined) t.googleTaskId = null
+  if (t.googleEventId === undefined) t.googleEventId = null
+  if (t.completed === undefined) t.completed = false
+  return t
+}
+
+function pick(obj, keys) {
+  const out = {}
+  for (const k of keys) if (Object.prototype.hasOwnProperty.call(obj, k)) out[k] = obj[k]
+  return out
+}
