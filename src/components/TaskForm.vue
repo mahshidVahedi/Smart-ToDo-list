@@ -36,10 +36,10 @@
           <label class="form-label">⏰ ساعت</label>
           <div class="flex gap-2">
             <select v-model="selectedMinute" class="input-style w-1/2">
-              <option v-for="m in [0, 15, 30, 45]" :key="'m'+m" :value="m">{{ m.toString().padStart(2, '0') }}</option>
+              <option v-for="m in minuteSteps" :key="'m'+m" :value="m">{{ m.toString().padStart(2, '0') }}</option>
             </select>
             <select v-model="selectedHour" class="input-style w-1/2">
-              <option v-for="h in 24" :key="'h'+h" :value="h">{{ h.toString().padStart(2, '0') }}</option>
+              <option v-for="h in hours" :key="'h'+h" :value="h">{{ h.toString().padStart(2, '0') }}</option>
             </select>
           </div>
         </div>
@@ -51,10 +51,10 @@
               <div class="mb-1 text-xs text-gray-500 dark:text-gray-400">شروع</div>
               <div class="flex gap-2">
                 <select v-model="startMinute" class="input-style w-1/2">
-                  <option v-for="m in [0, 15, 30, 45]" :key="'sm'+m" :value="m">{{ m.toString().padStart(2, '0') }}</option>
+                  <option v-for="m in minuteSteps" :key="'sm'+m" :value="m">{{ m.toString().padStart(2, '0') }}</option>
                 </select>
                 <select v-model="startHour" class="input-style w-1/2">
-                  <option v-for="h in 24" :key="'sh'+h" :value="h">{{ h.toString().padStart(2, '0') }}</option>
+                  <option v-for="h in hours" :key="'sh'+h" :value="h">{{ h.toString().padStart(2, '0') }}</option>
                 </select>
               </div>
             </div>
@@ -62,10 +62,10 @@
               <div class="mb-1 text-xs text-gray-500 dark:text-gray-400">پایان</div>
               <div class="flex gap-2">
                 <select v-model="endMinute" class="input-style w-1/2">
-                  <option v-for="m in [0, 15, 30, 45]" :key="'em'+m" :value="m">{{ m.toString().padStart(2, '0') }}</option>
+                  <option v-for="m in minuteSteps" :key="'em'+m" :value="m">{{ m.toString().padStart(2, '0') }}</option>
                 </select>
                 <select v-model="endHour" class="input-style w-1/2">
-                  <option v-for="h in 24" :key="'eh'+h" :value="h">{{ h.toString().padStart(2, '0') }}</option>
+                  <option v-for="h in hours" :key="'eh'+h" :value="h">{{ h.toString().padStart(2, '0') }}</option>
                 </select>
               </div>
             </div>
@@ -107,8 +107,7 @@
         </button>
         <button v-if="!isEditMode" type="button" class="cancel-btn w-full sm:w-auto" @click="manualMode = false">↩️
           بازگشت به تنظیمات هوشمند</button>
-        <button v-if="isEditMode" type="button" class="cancel-btn w-full sm:w-auto"
-          @click="handleCancel">انصراف</button>
+        <button v-if="isEditMode" type="button" class="cancel-btn w-full sm:w-auto" @click="handleCancel">انصراف</button>
       </div>
     </div>
   </form>
@@ -124,20 +123,23 @@ const props = defineProps({
   initialData: Object,
   projectId: Number
 })
-
 const emit = defineEmits(['toast', 'cancel', 'submit'])
 
 const form = reactive({
   title: '',
   date: '',
-  time: '',       
+  time: '',             
   priority: '',
   repeat: '',
-  timeRange: null 
+  timeRange: null       
 })
+
+const hours = Array.from({ length: 24 }, (_, i) => i) // 0..23
+const minuteSteps = [0, 15, 30, 45]
 
 const manualMode = ref(false)
 const timeMode = ref('single') 
+
 const selectedHour = ref(8)
 const selectedMinute = ref(0)
 
@@ -148,6 +150,12 @@ const endMinute = ref(0)
 
 const pad2 = (n) => n.toString().padStart(2, '0')
 const toHM = (h, m) => `${pad2(parseInt(h,10)||0)}:${pad2(parseInt(m,10)||0)}`
+const asFromTo = (r) => {
+  if (!r) return null
+  if (r.from && r.to) return { from: r.from, to: r.to }
+  if (r.start && r.end) return { from: r.start, to: r.end }
+  return null
+}
 
 const rangeInvalid = computed(() => {
   if (timeMode.value !== 'range') return false
@@ -160,16 +168,17 @@ const hasHydrated = ref(false)
 const hydrateFromInitial = (task) => {
   const trim = (s) => (s ?? '').toString().trim()
 
-  form.title = task.title || ''
-  form.date = task.date || ''
-  form.time = task.time || ''
+  form.title    = task.title    || ''
+  form.date     = task.date     || ''
+  form.time     = task.time     || ''
   form.priority = task.priority || ''
-  form.repeat = task.repeat || ''
-  form.timeRange = task.timeRange || null
+  form.repeat   = task.repeat   || ''
+  form.timeRange= task.timeRange|| null
 
-  if (form.timeRange?.start && form.timeRange?.end) {
-    const [sh, sm] = trim(form.timeRange.start).split(':').map(v=>parseInt(v,10)||0)
-    const [eh, em] = trim(form.timeRange.end).split(':').map(v=>parseInt(v,10)||0)
+  const range = asFromTo(form.timeRange)
+  if (range && range.from && range.to) {
+    const [sh, sm] = trim(range.from).split(':').map(v=>parseInt(v,10)||0)
+    const [eh, em] = trim(range.to).split(':').map(v=>parseInt(v,10)||0)
     startHour.value = sh; startMinute.value = sm; endHour.value = eh; endMinute.value = em
     timeMode.value = 'range'
   } else if (typeof form.time === 'string' && form.time.includes('-')) {
@@ -257,8 +266,8 @@ const handleSubmit = () => {
     }
     const start = toHM(startHour.value, startMinute.value)
     const end   = toHM(endHour.value, endMinute.value)
-    payload.timeRange = { start, end }
-    payload.time = `${start}-${end}` 
+    payload.timeRange = { from: start, to: end }
+    payload.time = `${start}-${end}`
   }
 
   emit('submit', payload)
@@ -273,6 +282,7 @@ const handleSubmit = () => {
   }
 }
 
+/* ریست */
 function resetForm () {
   form.title = ''
   form.date = ''

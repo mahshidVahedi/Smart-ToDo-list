@@ -1,3 +1,4 @@
+// src/store/tasks.js
 import { defineStore } from 'pinia'
 
 export const useTaskStore = defineStore('task', {
@@ -39,8 +40,14 @@ export const useTaskStore = defineStore('task', {
     },
 
     reorderTasks(newList, pid) {
+      const byId = new Map(this.tasks.map(t => [t.id, t]))
+      const rebuilt = newList.map(item => {
+        const old = byId.get(item.id) || {}
+        const merged = { ...old, ...item } 
+        return normalizeTask(merged)
+      })
       const otherTasks = this.tasks.filter(t => !(pid === 0 || t.projectId === pid))
-      this.tasks = [...otherTasks, ...newList.map(normalizeTask)]
+      this.tasks = [...otherTasks, ...rebuilt]
       this.saveTasks()
     },
 
@@ -54,10 +61,7 @@ export const useTaskStore = defineStore('task', {
       this.tasks = this.tasks.filter(t => t.projectId !== id)
       this.saveProjects()
       this.saveTasks()
-
-      if (this.selectedProjectId === id) {
-        this.selectedProjectId = 0
-      }
+      if (this.selectedProjectId === id) this.selectedProjectId = 0
     },
 
     selectProject(id) {
@@ -75,10 +79,7 @@ export const useTaskStore = defineStore('task', {
     updateTaskFromSync(localId, patch) {
       const i = this.tasks.findIndex(t => t.id === localId)
       if (i === -1) return
-      const allowed = pick(patch, [
-        'googleTaskId',
-        'googleEventId',
-      ])
+      const allowed = pick(patch, ['googleTaskId', 'googleEventId'])
       this.tasks[i] = { ...this.tasks[i], ...allowed }
       this.saveTasks()
     },
@@ -95,12 +96,12 @@ export const useTaskStore = defineStore('task', {
   }
 })
 
-
 function normalizeTask(task) {
   const t = { ...task }
   if (t.googleTaskId === undefined) t.googleTaskId = null
   if (t.googleEventId === undefined) t.googleEventId = null
   if (t.completed === undefined) t.completed = false
+  if (t.timeRange !== undefined && t.timeRange == null) t.timeRange = null
   return t
 }
 
