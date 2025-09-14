@@ -45,3 +45,4 @@ export function signOut() {
   const auth = gapi.auth2.getAuthInstance()
   if (auth) auth.signOut()
 }
+

@@ -9,7 +9,7 @@
     </div>
 
     <div v-else class="flex flex-col items-center gap-2 w-full max-w-xl">
-      <span class="text-sm text-gray-700 dark:text-gray-300 self-start">{{ name }} خوش اومدی 👋</span>
+      <span class="text-sm text-gray-700 dark:text-gray-300 self-start">{{ name }} خوش اومدی </span>
       <button @click="logout" class="self-start mt-1 px-3 py-1 text-xs bg-red-500 hover:bg-red-600 text-white rounded-full">
         خروج از حساب گوگل
       </button>
